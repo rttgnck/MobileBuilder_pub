@@ -1,0 +1,488 @@
+/* Gemini Theme - Dark Frosted Glass Blue/Green Synthwave */
+/* Based on the beautiful old-style.css design with Gemini-specific colors */
+
+:root {
+    /* Gemini Brand Colors - Dark Blue/Green Synthwave */
+    --gemini-primary: #00d4ff;
+    --gemini-primary-dark: #0099cc;
+    --gemini-primary-light: #66e6ff;
+    --gemini-secondary: #00ff88;
+    --gemini-secondary-dark: #00cc6a;
+    --gemini-secondary-light: #66ffaa;
+    
+    /* Gemini Accent Colors */
+    --gemini-accent: #8a2be2;
+    --gemini-accent-dark: #6a1b9a;
+    --gemini-accent-light: #b388ff;
+    
+    /* Gemini Background Colors - Dark Frosted Glass */
+    --gemini-bg-primary: rgba(0, 0, 0, 0.95);
+    --gemini-bg-secondary: rgba(18, 18, 18, 0.75);
+    --gemini-bg-tertiary: rgba(25, 25, 25, 0.6);
+    --gemini-bg-dark: rgba(10, 10, 10, 0.6);
+    --gemini-bg-glass: rgba(0, 212, 255, 0.1);
+    --gemini-bg-glass-dark: rgba(0, 0, 0, 0.4);
+    
+    /* Gemini Text Colors */
+    --gemini-text-primary: #00d4ff;
+    --gemini-text-secondary: #66e6ff;
+    --gemini-text-muted: #99f0ff;
+    --gemini-text-light: #ffffff;
+    
+    /* Gemini Border Colors */
+    --gemini-border: rgba(0, 212, 255, 0.15);
+    --gemini-border-dark: rgba(0, 153, 204, 0.3);
+    --gemini-border-light: rgba(0, 212, 255, 0.08);
+    
+    /* Gemini Shadow Colors */
+    --gemini-shadow: rgba(0, 212, 255, 0.2);
+    --gemini-shadow-dark: rgba(0, 212, 255, 0.4);
+    --gemini-shadow-light: rgba(0, 212, 255, 0.1);
+    --gemini-glow: 0 0 20px rgba(0, 212, 255, 0.5);
+    --gemini-glow-green: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+/* Session Viewer CSS Custom Properties for Gemini Theme */
+.gemini-theme {
+    /* Base Colors */
+    --bg-primary: var(--gemini-bg-primary);
+    --bg-secondary: var(--gemini-bg-secondary);
+    --bg-tertiary: var(--gemini-bg-tertiary);
+    --bg-dark: var(--gemini-bg-dark);
+    --bg-hover: rgba(0, 212, 255, 0.05);
+    --bg-active: rgba(0, 212, 255, 0.1);
+    
+    /* Text Colors */
+    --text-primary: var(--gemini-text-primary);
+    --text-secondary: var(--gemini-text-secondary);
+    --text-muted: var(--gemini-text-muted);
+    --text-light: var(--gemini-text-light);
+    
+    /* Border Colors */
+    --border: var(--gemini-border);
+    --border-hover: var(--gemini-border-dark);
+    
+    /* Primary/Secondary Colors */
+    --primary: var(--gemini-primary);
+    --secondary: var(--gemini-secondary);
+    
+    /* Message Colors */
+    --message-bg: rgba(25, 25, 25, 0.8);
+    --message-border: rgba(0, 212, 255, 0.08);
+    --message-text: var(--gemini-text-secondary);
+    
+    --user-message-bg: rgba(0, 212, 255, 0.05);
+    --user-message-border: var(--gemini-border);
+    --user-message-text: var(--gemini-text-primary);
+    
+    --agent-message-bg: rgba(25, 25, 25, 0.9);
+    --agent-message-text: var(--gemini-text-secondary);
+    
+    --system-message-bg: rgba(100, 100, 100, 0.2);
+    --system-message-text: #888;
+    --system-message-border: rgba(100, 100, 100, 0.3);
+    
+    /* Avatar Colors */
+    --avatar-bg: rgba(0, 212, 255, 0.1);
+    --avatar-border: var(--gemini-border);
+    --avatar-text: var(--gemini-text-primary);
+    
+    /* Toast Colors */
+    --toast-bg: rgba(25, 25, 25, 0.95);
+    --toast-border: var(--gemini-border);
+    --toast-text: #fff;
+    --toast-title: var(--gemini-text-primary);
+    --toast-message: var(--gemini-text-secondary);
+    
+    /* Modal Colors */
+    --modal-bg: rgba(25, 25, 25, 0.95);
+    --modal-border: var(--gemini-border);
+    
+    /* Preview Colors */
+    --preview-bg: rgba(0, 212, 255, 0.05);
+    --preview-more-bg: rgba(0, 212, 255, 0.05);
+    --preview-info-bg: rgba(0, 212, 255, 0.05);
+    
+    /* Warning/Error/Success Colors */
+    --warning-color: var(--gemini-secondary);
+    --warning-bg: rgba(0, 255, 136, 0.1);
+    --error-color: #ff3333;
+    --error-bg: rgba(255, 51, 51, 0.1);
+    --success-color: #51cf66;
+    --success-bg: rgba(81, 207, 102, 0.1);
+    
+    /* Hover States */
+    --bg-tertiary-hover: rgba(0, 212, 255, 0.15);
+}
+
+/* Gemini-specific body styling */
+body.gemini-theme {
+    background: var(--gemini-bg-primary);
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 153, 204, 0.05) 0%, transparent 50%);
+    color: var(--gemini-text-primary);
+}
+
+/* Gemini container styling */
+.gemini-theme .container {
+    background: var(--gemini-bg-secondary);
+    border: 1px solid var(--gemini-border);
+    box-shadow: 
+        0 24px 48px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(0, 212, 255, 0.08);
+}
+
+/* Gemini connection screen */
+.gemini-theme .connection-screen {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(18, 18, 18, 0.9));
+}
+
+.gemini-theme .connection-panel {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--gemini-border);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 1px rgba(0, 212, 255, 0.08);
+}
+
+.gemini-theme .connection-logo {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    color: var(--gemini-bg-primary);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+}
+
+.gemini-theme .connection-title {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.gemini-theme .connection-subtitle {
+    color: var(--gemini-text-secondary);
+}
+
+.gemini-theme .btn-primary {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+}
+
+.gemini-theme .btn-primary:hover {
+    box-shadow: 0 12px 32px rgba(0, 212, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.gemini-theme .connection-session-item:hover {
+    border-color: var(--gemini-accent);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.gemini-theme .connection-actions .btn-secondary {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--gemini-text-light);
+}
+
+.gemini-theme .connection-actions .btn-secondary:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 136, 0.2));
+    border-color: var(--gemini-accent);
+}
+
+/* Gemini form elements */
+.gemini-theme .form-input {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-secondary);
+}
+
+.gemini-theme .form-input:focus {
+    border-color: var(--gemini-primary);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.gemini-theme .form-label {
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .form-hint {
+    color: #666;
+}
+
+/* Gemini buttons */
+.gemini-theme .btn-primary, .gemini-theme .connect-button {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    color: var(--gemini-bg-primary);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.gemini-theme .btn-primary:hover:not(:disabled), .gemini-theme .connect-button:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+}
+
+.gemini-theme .btn-secondary {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .btn-secondary:hover {
+    background: rgba(0, 212, 255, 0.2);
+}
+
+.gemini-theme .btn-danger {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: rgba(255, 51, 51, 0.3);
+    color: #ff6666;
+}
+
+.gemini-theme .btn-danger:hover {
+    background: rgba(255, 51, 51, 0.2);
+}
+
+/* Gemini header */
+.gemini-theme .header {
+    background: var(--gemini-bg-dark);
+    border-bottom: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .logo {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    color: var(--gemini-bg-primary);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+/* Gemini session timer */
+.gemini-theme .session-timer {
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .timer-value {
+    color: var(--gemini-text-primary);
+}
+
+/* Gemini status */
+.gemini-theme .status {
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .status-dot {
+    background: var(--gemini-primary);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Gemini header buttons */
+.gemini-theme .header-button {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .header-button:hover {
+    background: rgba(0, 212, 255, 0.2);
+}
+
+.gemini-theme .header-button.danger {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: rgba(255, 51, 51, 0.3);
+    color: #ff6666;
+}
+
+.gemini-theme .header-button.danger:hover {
+    background: rgba(255, 51, 51, 0.2);
+}
+
+/* Gemini sidebar */
+.gemini-theme .sidebar {
+    background: var(--gemini-bg-dark);
+    border-right: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .sidebar-header {
+    border-bottom: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .sidebar-title {
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .sidebar-button {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .sidebar-button:hover {
+    background: rgba(0, 212, 255, 0.2);
+}
+
+/* Gemini session items */
+.gemini-theme .session-item {
+    background: var(--gemini-bg-tertiary);
+    border: 1px solid rgba(100, 100, 100, 0.2);
+}
+
+.gemini-theme .session-item:hover {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: var(--gemini-border);
+}
+
+.gemini-theme .session-item.active {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--gemini-primary);
+}
+
+.gemini-theme .session-name {
+    color: var(--gemini-text-secondary);
+}
+
+.gemini-theme .session-meta {
+    color: #666;
+}
+
+/* Gemini chat container */
+.gemini-theme .chat-container {
+    background: rgba(5, 5, 5, 0.3);
+}
+
+/* Gemini messages */
+.gemini-theme .message-avatar {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .message.user .message-avatar {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 153, 204, 0.2));
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.gemini-theme .message.claude .message-avatar {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 106, 0.2));
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.gemini-theme .message.system .message-avatar {
+    background: rgba(100, 100, 100, 0.2);
+    color: #888;
+    border-color: rgba(100, 100, 100, 0.3);
+}
+
+.gemini-theme .message-content {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(0, 212, 255, 0.08);
+}
+
+.gemini-theme .message.user .message-content {
+    color: var(--gemini-text-primary);
+    background: rgba(0, 212, 255, 0.05);
+    border-color: var(--gemini-border);
+}
+
+.gemini-theme .message.claude .message-content {
+    color: var(--gemini-text-secondary);
+    background: rgba(25, 25, 25, 0.8);
+}
+
+/* Gemini input container */
+.gemini-theme .input-container {
+    background: var(--gemini-bg-dark);
+    border-top: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .input-field {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .input-field:focus {
+    background: rgba(25, 25, 25, 0.9);
+    border-color: var(--gemini-primary);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.gemini-theme .send-button {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    color: var(--gemini-bg-primary);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.gemini-theme .send-button:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+}
+
+/* Gemini toast notifications */
+.gemini-theme .toast {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .toast.warning {
+    border-color: var(--gemini-secondary);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.gemini-theme .toast.danger {
+    border-color: #ff3333;
+    background: rgba(255, 51, 51, 0.1);
+}
+
+.gemini-theme .toast-title {
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .toast-message {
+    color: var(--gemini-text-secondary);
+}
+
+/* Gemini scrollbars */
+.gemini-theme ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.gemini-theme ::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.gemini-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.3);
+}
+
+/* Gemini loading spinner */
+.gemini-theme .spinner {
+    border-top-color: var(--gemini-primary);
+}
+
+/* Gemini dialog */
+.gemini-theme .dialog {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .dialog-title {
+    color: var(--gemini-text-primary);
+}
+
+.gemini-theme .dialog-message {
+    color: var(--gemini-text-secondary);
+}
+
+.gemini-theme .dialog-button.primary {
+    background: linear-gradient(135deg, var(--gemini-primary), var(--gemini-secondary));
+    color: var(--gemini-bg-primary);
+}
+
+.gemini-theme .dialog-button.secondary {
+    background: transparent;
+    color: var(--gemini-text-secondary);
+    border: 1px solid var(--gemini-border);
+}
+
+.gemini-theme .dialog-button:hover {
+    transform: translateY(-1px);
+}

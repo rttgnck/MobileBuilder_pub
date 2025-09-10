@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <title id="pageTitle">{% block title %}Agent Interface - MobileBuilder{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/connection.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/claude.css') }}" id="claudeCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gemini.css') }}" id="geminiCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cursor.css') }}" id="cursorCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/codex.css') }}" id="codexCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/project-editor.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/diff-viewer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-scaling.css') }}">
+    <style>
+        /* Thinking Cursor Animation */
+        .thinking-cursor {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--claude-primary, #ff6b35);
+            font-style: italic;
+            color: var(--claude-text-light, #666);
+        }
+        
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .thinking-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--claude-primary, #ff6b35);
+            border-radius: 50%;
+            animation: thinking-bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .thinking-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .thinking-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        .thinking-dot:nth-child(3) {
+            animation-delay: 0s;
+        }
+        
+        @keyframes thinking-bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        .thinking-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Agent-specific thinking cursor colors */
+        .claude-theme .thinking-cursor {
+            border-left-color: var(--claude-primary);
+        }
+        
+        .claude-theme .thinking-dot {
+            background: var(--claude-primary);
+        }
+        
+        .gemini-theme .thinking-cursor {
+            border-left-color: var(--gemini-primary);
+        }
+        
+        .gemini-theme .thinking-dot {
+            background: var(--gemini-primary);
+        }
+        
+        .cursor-theme .thinking-cursor {
+            border-left-color: var(--cursor-primary);
+        }
+        
+        .cursor-theme .thinking-dot {
+            background: var(--cursor-primary);
+        }
+        
+        .codex-theme .thinking-cursor {
+            border-left-color: var(--codex-primary);
+        }
+        
+        .codex-theme .thinking-dot {
+            background: var(--codex-primary);
+        }
+    </style>
+    {% block styles %}{% endblock %}
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ansi_up@5.1.0/ansi_up.min.js"></script>
+    
+    <!-- Project Tree and File Editor Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/mode-text.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/theme-monokai.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/theme-github.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/theme-tomorrow.min.js"></script>
+</head>
+<body id="agentBody" class="{% block body_class %}claude-theme{% endblock %}">
+    {% include 'connection_screen.html' %}
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="header">
+            <div class="logo" id="agentLogo">{% block logo %}A{% endblock %}</div>
+            <h1 id="agentTitle">{% block agent_title %}Agent Interface{% endblock %}</h1>
+            <p class="subtitle" id="agentSubtitle">{% block subtitle %}AI Assistant{% endblock %}</p>
+            
+            <div class="header-controls" id="headerControls">
+                <div class="header-server-status" id="serverStatus">
+                    <button class="header-controls-toggle" id="headerStatusToggle" onclick="toggleHeaderStatus(event)">
+                        <span>Status</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <!-- Always visible elements -->
+                    <div class="session-actions-container" id="sessionStatusContainer">
+                        <div class="session-actions always-visible">
+                            <div class="working-directory" id="workingDirectoryDisplay" style="display: flex;">
+                                <span class="wd-label">Working Directory:</span>
+                                <span class="wd-path" id="wdPath"></span>
+                            </div>
+                        </div>
+
+                        <div class="session-actions always-visible">
+                            <div class="session-timer" id="sessionTimer" style="display: none;">
+                                <span class="timer-label">Active Time:</span>
+                                <span class="timer-value" id="timerValue">00:00:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="session-actions always-visible">
+                            <div class="status" id="connectionStatus">
+                                <div class="status-dot disconnected" id="statusDot"></div>
+                                <span id="statusText" style="font-size: 13px;">Disconnected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collapsible menu container -->
+                <div class="header-controls-menu" id="headerControlsMenu">
+                    <!-- Dropdown toggle button (shown when collapsed) -->
+                    <button class="header-controls-toggle" id="headerControlsToggle" onclick="toggleHeaderControls(event)">
+                        <span>Menu</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Session actions container -->
+                    <div class="session-actions-container" id="sessionActionsContainer">
+                        <div class="session-actions">
+                            <button class="btn-secondary" id="historyBtn" onclick="openSessionViewer()">
+                                History
+                            </button>
+                        </div>
+                        
+                        <div class="session-actions">
+                            <button class="btn-secondary" onclick="showHelpDialog()">
+                                Help
+                            </button>
+                        </div>
+                        
+                        <div class="session-actions">
+                            <button class="btn-danger" id="disconnectBtn" onclick="showDisconnectDialog()" style="display: none;">
+                                Disconnect
+                            </button>
+                        </div>
+                        
+                        <div class="session-actions">
+                            <a href="/" class="btn-secondary">←</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tab-container">
+                <div class="tab-header">
+                    <button class="tab-button active" data-tab="chat">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Chat
+                    </button>
+                    <button class="tab-button" data-tab="project">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 5H20C20.5304 5 21.0391 5.21071 21.4142 5.58579C21.7893 5.96086 22 6.46957 22 7V19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Project
+                    </button>
+                    <button class="tab-button" data-tab="editor">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Editor
+                    </button>
+                    <button class="tab-button" data-tab="diffs" id="diffsTabButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Diffs
+                        <span id="diffsNotificationBadge" class="diff-notification-badge" style="display: none;">0</span>
+                    </button>
+                </div>
+
+                <!-- Chat Tab Content -->
+                <div class="tab-content active" id="chat-tab">
+                    <div class="chat-wrapper">
+                        <div class="chat-container" id="chatContainer">
+                            <!-- Messages will be added here -->
+                        </div>
+
+                        <div class="input-container">
+                            <div class="input-wrapper">
+                                <input 
+                                    type="text" 
+                                    class="form-input" 
+                                    id="inputField"
+                                    placeholder="{% block placeholder %}Enter command...{% endblock %}"
+                                    autocomplete="off"
+                                    disabled>
+                                <button class="btn-primary" id="sendButton" disabled>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button class="btn-enter" id="enterButton" disabled title="Send Enter Key">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 10L12 7L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M21 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button class="btn-secondary" id="backspaceButton" disabled title="Send Backspace Key">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Tab Content -->
+                <div class="tab-content" id="project-tab">
+                    <div class="project-panel">
+                        <div class="project-header">
+                            <h3>Project Files</h3>
+                            <div class="project-controls">
+                                <button class="btn-secondary" id="refreshProject" title="Refresh">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 12A9 9 0 0 1 12 3A9 9 0 0 1 21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M21 12A9 9 0 0 1 12 21A9 9 0 0 1 3 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 3V12L16 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="project-tree" id="projectTree">
+                            <div class="loading">Loading project files...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor Tab Content -->
+                <div class="tab-content" id="editor-tab">
+                    <div class="editor-panel">
+                        <div class="editor-header">
+                            <div class="file-info">
+                                <span id="currentFileName">No file selected</span>
+                                <span id="filePath" class="file-path"></span>
+                            </div>
+                            <div class="editor-controls">
+                                <button class="btn-secondary" id="saveFile" title="Save File" disabled>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M17 21V13H7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7 3V8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Save
+                                </button>
+                                <button class="btn-secondary" id="closeFile" title="Close File" disabled>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="editor-container" id="editorContainer">
+                            <div class="no-file-selected">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <p>Select a file from the project tree to edit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diffs Tab Content -->
+                <div class="tab-content" id="diffs-tab">
+                    <div class="diffs-panel">
+                        <div class="diff-bulk-actions" id="diffBulkActions" style="display: none;">
+                            <div class="diff-bulk-info">
+                                <span id="pendingDiffsCount">0</span> pending changes
+                            </div>
+                            <div class="diff-bulk-buttons">
+                                <button class="diff-bulk-btn accept-all" id="acceptAllDiffs">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Accept All
+                                </button>
+                                <button class="diff-btn toggle" id="refreshDiffs">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 12A9 9 0 0 1 12 3A9 9 0 0 1 21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M21 12A9 9 0 0 1 12 21A9 9 0 0 1 3 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12 3V12L16 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="diffs-container" id="diffsContainer">
+                            <div class="diff-no-changes">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <p>No file changes detected</p>
+                                <p style="font-size: 12px; margin-top: 8px;">File changes will appear here when the AI modifies files in your working directory</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Disconnect Confirmation Dialog -->
+    <div class="dialog-overlay" id="disconnectDialog">
+        <div class="dialog">
+            <div class="dialog-title" id="disconnectTitle">{% block disconnect_title %}Disconnect Session?{% endblock %}</div>
+            <div class="dialog-message" id="disconnectMessage">
+                {% block disconnect_message %}This will end the current session. All connected devices will be disconnected.{% endblock %}
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-secondary" onclick="hideDisconnectDialog()">Cancel</button>
+                <button class="btn-primary" onclick="confirmDisconnect()">Disconnect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Dialog -->
+    <div class="dialog-overlay" id="helpDialog">
+        <div class="dialog">
+            <div class="dialog-title">Console Interaction Help</div>
+            <div class="dialog-message">
+                <h4>Navigation Keys:</h4>
+                <ul>
+                    <li><strong>↑↓←→</strong> - Arrow keys for navigation</li>
+                    <li><strong>Home/End</strong> - Move to beginning/end of line</li>
+                    <li><strong>Page Up/Down</strong> - Scroll through history</li>
+                    <li><strong>Tab</strong> - Autocomplete</li>
+                </ul>
+                
+                <h4>Control Keys:</h4>
+                <ul>
+                    <li><strong>Ctrl+C</strong> - Interrupt current process</li>
+                    <li><strong>Ctrl+D</strong> - End of file (EOF)</li>
+                    <li><strong>Ctrl+L</strong> - Clear screen</li>
+                    <li><strong>Ctrl+U</strong> - Clear current line</li>
+                    <li><strong>Ctrl+K</strong> - Clear from cursor to end</li>
+                    <li><strong>Ctrl+A</strong> - Move to beginning of line</li>
+                    <li><strong>Ctrl+E</strong> - Move to end of line</li>
+                    <li><strong>Ctrl+W</strong> - Delete word backward</li>
+                    <li><strong>Ctrl+Z</strong> - Suspend process</li>
+                </ul>
+                
+                <h4>Other Keys:</h4>
+                <ul>
+                    <li><strong>Escape</strong> - Cancel current operation</li>
+                    <li><strong>Delete</strong> - Delete character at cursor</li>
+                    <li><strong>F1-F12</strong> - Function keys</li>
+                </ul>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-primary" onclick="hideHelpDialog()">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set DEFAULT_WORKING_DIR from template
+        window.DEFAULT_WORKING_DIR = "{{ DEFAULT_WORKING_DIR }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/shared-agent-interface.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/diff-viewer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mobile-scaling.js') }}"></script>
+    {% block agent_script %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends "agent_base.html" %}
+
+{% block title %}Gemini Agent - MobileBuilder{% endblock %}
+
+{% block styles %}
+<style>
+    .special-key {
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 18px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        box-shadow: 0 3px 12px rgba(66, 133, 244, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .special-key::before {
+        content: "⌨";
+        font-size: 10px;
+        opacity: 0.8;
+    }
+    
+    .special-key:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(66, 133, 244, 0.5);
+    }
+    
+    .command-preview {
+        color: #666;
+        font-size: 10px;
+        margin-left: 8px;
+        opacity: 0.7;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block body_class %}gemini-theme{% endblock %}
+{% block logo %}G{% endblock %}
+{% block agent_title %}Gemini Agent{% endblock %}
+{% block subtitle %}Advanced AI Reasoning & Coding{% endblock %}
+{% block status_color %}color: var(--gemini-text-light);{% endblock %}
+{% block placeholder %}Enter command for Gemini...{% endblock %}
+{% block disconnect_title %}Disconnect Gemini Session?{% endblock %}
+{% block disconnect_message %}This will send the <code>/quit</code> command to Gemini and end the current session. All connected devices will be disconnected.{% endblock %}
+
+{% block agent_script %}
+<script>
+    // Gemini-specific configuration
+    window.addEventListener('load', function() {
+        initializeAgent({
+            type: 'gemini',
+            name: 'Gemini',
+            subtitle: 'Multimodal AI with coding capabilities',
+            logo: 'G',
+            exitCommand: '/quit',
+            avatar: 'G',
+            welcomeMessage: 'Welcome to Gemini Agent Interface - Multimodal AI & Code Review'
+        });
+    });
+</script>
+{% endblock %}

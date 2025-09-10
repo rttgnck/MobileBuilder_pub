@@ -1,0 +1,8 @@
+Flask==3.0.0
+flask-socketio==5.3.5
+flask-cors==6.0.1
+python-socketio==5.10.0
+python-dotenv==1.0.0
+claude-code-sdk>=0.0.20
+mcp>=1.13.1
+watchdog==4.0.1

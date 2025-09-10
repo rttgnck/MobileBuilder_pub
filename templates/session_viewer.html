@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Viewer - MobileBuilder</title>
+    
+    <!-- Dynamic CSS loading based on agent type -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/session_viewer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/claude.css') }}" id="claudeCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gemini.css') }}" id="geminiCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cursor.css') }}" id="cursorCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/codex.css') }}" id="codexCSS" style="display: none;">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-scaling.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/ansi_up@5.1.0/ansi_up.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+
+<body class="session-viewer-container" id="sessionViewerBody">
+    <!-- Header Section -->
+    <div class="session-header">
+        <div class="header-left">
+            <div class="agent-logo" id="agentLogo">A</div>
+            <div class="header-info">
+                <h1 id="sessionName">Session Viewer</h1>
+                <div class="session-meta">
+                    <span id="sessionDate">Loading...</span> • 
+                    <span id="messageCount">0 messages</span> • 
+                    <span id="workingDirectory">Working directory</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header-controls" id="headerControls">
+            <!-- Collapsible menu container -->
+            <div class="header-controls-menu" id="headerControlsMenu">
+                <!-- Dropdown toggle button (shown when collapsed) -->
+                <button class="header-controls-toggle" id="headerControlsToggle" onclick="toggleHeaderControls(event)">
+                    <span>Menu</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                
+                <!-- Session actions container -->
+                <div class="session-actions-container" id="sessionActionsContainer">
+                    <div class="session-actions">
+                        <button class="btn btn-primary" id="startNewSessionBtn" onclick="startNewSession()">
+                            🚀 Start New Session
+                        </button>
+                    </div>
+                    <div class="session-actions">
+                        <button class="btn btn-success" id="resumeSessionBtn" onclick="resumeSession()" style="display: none;">
+                            🔄 Resume Session
+                        </button>
+                    </div>
+                    <div class="session-actions">
+                        <button class="btn btn-secondary" id="exportSessionBtn" onclick="exportSession()">
+                            📥 Export Session
+                        </button>
+                    </div>
+                    <div class="session-actions">
+                        <button class="btn btn-secondary" id="refreshBtn" onclick="refreshSession()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                    <div class="session-actions">
+                        <a href="/" class="back-button" id="backButton">
+                            ←
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Sidebar for session list -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Session History</div>
+                <div class="sidebar-controls">
+                    <button class="btn btn-secondary" onclick="loadSessions()">Refresh</button>
+                    <button class="btn btn-secondary" onclick="clearOldSessions()">Clear Old</button>
+                </div>
+            </div>
+            <div class="session-list" id="sessionList">
+                <!-- Sessions will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div class="chat-wrapper">
+            <div class="chat-container" id="chatContainer">
+                <div class="loading-messages" id="loadingMessages">
+                    <div class="spinner"></div>
+                    <div>Loading session messages...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Session Preview Modal -->
+    <div class="modal-overlay" id="sessionPreviewModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalSessionName">Session Preview</h3>
+                <button class="modal-close" onclick="closeSessionPreview()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="startSessionFromPreview()">Start New Session</button>
+                <button class="btn btn-secondary" onclick="closeSessionPreview()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global Variables
+        let currentAgentType = null;
+        let currentSessionId = null;
+        let currentSession = null;
+        let currentMessages = [];
+        let allSessions = [];
+        let ansiUp = new AnsiUp();
+        let previewSessionData = null;
+        let socket = null;
+        
+        // Configure ANSI converter
+        ansiUp.use_classes = true;
+        ansiUp.escape_for_html = false;
+        
+        // Initialize the viewer
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize SocketIO connection
+            socket = io();
+            initializeViewer();
+            initializeResponsiveHeader();
+        });
+        
+        function initializeViewer() {
+            // Get agent type and session ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const agentType = urlParams.get('agent');
+            const sessionId = urlParams.get('session');
+            
+            if (!agentType) {
+                showError('Missing required parameter: agent type');
+                return;
+            }
+            
+            currentAgentType = agentType;
+            loadAgentTheme(agentType);
+            
+            // Always load sessions first to populate the sidebar
+            loadSessions();
+            
+            if (sessionId) {
+                currentSessionId = sessionId;
+                loadSessionData(sessionId);
+            } else {
+                // No specific session, show session list
+                showSessionList();
+            }
+        }
+        
+        function loadAgentTheme(agentType) {
+            // Hide all agent-specific CSS files
+            document.getElementById('claudeCSS').style.display = 'none';
+            document.getElementById('geminiCSS').style.display = 'none';
+            document.getElementById('cursorCSS').style.display = 'none';
+            document.getElementById('codexCSS').style.display = 'none';
+            
+            // Show the appropriate agent CSS
+            const cssFile = document.getElementById(agentType + 'CSS');
+            if (cssFile) {
+                cssFile.style.display = 'block';
+            }
+            
+            // Update body class for theming
+            document.body.className = `session-viewer-container ${agentType}-theme`;
+            
+            // Update agent logo
+            const logo = document.getElementById('agentLogo');
+            switch(agentType) {
+                case 'claude':
+                    logo.textContent = 'C';
+                    break;
+                case 'gemini':
+                    logo.textContent = 'G';
+                    break;
+                case 'cursor':
+                    logo.textContent = 'CU';
+                    break;
+                case 'codex':
+                    logo.textContent = 'CX';
+                    break;
+                default:
+                    logo.textContent = 'A';
+            }
+            
+            // Update back button
+            document.getElementById('backButton').href = `/${agentType}`;
+        }
+        
+        function loadSessionData(sessionId) {
+            const apiUrl = `/api/sessions/${currentAgentType}/${sessionId}`;
+            
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.session && data.messages) {
+                        currentSession = data.session;
+                        currentMessages = data.messages;
+                        displaySessionInfo();
+                        displayMessages();
+                        hideLoading();
+                    } else {
+                        showError('Invalid session data received');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading session:', error);
+                    showError('Failed to load session data');
+                });
+        }
+        
+        function displaySessionInfo() {
+            if (!currentSession) return;
+            
+            // Update session name
+            document.getElementById('sessionName').textContent = 
+                currentSession.name || 'Unnamed Session';
+            
+            // Update session date
+            const startTime = new Date(currentSession.start_time);
+            document.getElementById('sessionDate').textContent = 
+                startTime.toLocaleDateString() + ' ' + startTime.toLocaleTimeString();
+            
+            // Update message count
+            document.getElementById('messageCount').textContent = 
+                currentMessages.length + ' messages';
+            
+            // Update working directory
+            document.getElementById('workingDirectory').textContent = 
+                currentSession.working_directory || 'Unknown directory';
+            
+            // Show/hide resume button based on agent_api_session_id availability
+            const resumeBtn = document.getElementById('resumeSessionBtn');
+            if (currentSession.agent_api_session_id) {
+                resumeBtn.style.display = 'inline-flex';
+            } else {
+                resumeBtn.style.display = 'none';
+            }
+        }
+        
+        function displayMessages() {
+            const container = document.getElementById('chatContainer');
+            
+            if (!currentMessages || currentMessages.length === 0) {
+                container.innerHTML = '<div class="no-messages">No messages found in this session</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            currentMessages.forEach((message, index) => {
+                const messageDiv = createMessageElement(message, index);
+                container.appendChild(messageDiv);
+                
+                // Add a small delay for staggered animation
+                setTimeout(() => {
+                    messageDiv.style.opacity = '1';
+                }, index * 50);
+            });
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function createMessageElement(message, index) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.type}`;
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transition = 'opacity 0.3s ease';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            
+            // Set avatar text based on message type and agent
+            if (message.type === 'user') {
+                avatar.textContent = 'U';
+            } else if (message.type === 'agent') {
+                switch(currentAgentType) {
+                    case 'claude':
+                        avatar.textContent = 'C';
+                        break;
+                    case 'gemini':
+                        avatar.textContent = 'G';
+                        break;
+                    case 'cursor':
+                        avatar.textContent = 'CU';
+                        break;
+                    case 'codex':
+                        avatar.textContent = 'CX';
+                        break;
+                    default:
+                        avatar.textContent = 'A';
+                }
+            } else {
+                avatar.textContent = 'S';
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            if (message.type === 'agent') {
+                // Process ANSI content for agent messages
+                const processed = ansiUp.ansi_to_html(message.content);
+                content.innerHTML = `<div class="terminal-output">${processed}</div>`;
+            } else {
+                content.textContent = message.content;
+            }
+            
+            // Add timestamp if available
+            if (message.timestamp) {
+                const timestamp = document.createElement('div');
+                timestamp.className = 'message-timestamp';
+                timestamp.textContent = new Date(message.timestamp).toLocaleTimeString();
+                content.appendChild(timestamp);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            return messageDiv;
+        }
+        
+        // Session List Functions
+        function loadSessions() {
+            const container = document.getElementById('sessionList');
+            if (container) {
+                container.innerHTML = '<div class="loading-sessions">Loading sessions...</div>';
+            }
+            
+            fetch(`/api/sessions/${currentAgentType}`)
+                .then(response => response.json())
+                .then(sessions => {
+                    allSessions = sessions;
+                    displaySessionList(sessions);
+                })
+                .catch(error => {
+                    console.error('Error loading sessions:', error);
+                    showToast('Error', 'Failed to load sessions', 'error');
+                    if (container) {
+                        container.innerHTML = '<div class="no-sessions">Failed to load sessions</div>';
+                    }
+                });
+        }
+        
+        function displaySessionList(sessions) {
+            const container = document.getElementById('sessionList');
+            container.innerHTML = '';
+            
+            if (sessions.length === 0) {
+                container.innerHTML = '<div class="no-sessions">No previous sessions found</div>';
+                return;
+            }
+            
+            sessions.forEach(session => {
+                const item = document.createElement('div');
+                item.className = 'session-item';
+                if (session.id === currentSessionId) {
+                    item.classList.add('active');
+                }
+                
+                const startTime = new Date(session.start_time);
+                item.innerHTML = `
+                    <button class="session-delete-btn" onclick="deleteSession('${session.id}', event)" title="Delete session">×</button>
+                    <div class="session-name">${session.name || 'Unnamed Session'}</div>
+                    <div class="session-meta">
+                        <span>${startTime.toLocaleDateString()}</span>
+                        <span>${session.message_count} messages</span>
+                    </div>
+                `;
+                
+                item.onclick = () => viewSession(session.id);
+                container.appendChild(item);
+            });
+        }
+        
+        function viewSession(sessionId) {
+            currentSessionId = sessionId;
+            loadSessionData(sessionId);
+            
+            // Update active state in sidebar
+            const items = document.querySelectorAll('.session-item');
+            items.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+        
+        function showSessionList() {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = `
+                <div class="session-list-view">
+                    <h2>Select a Session to View</h2>
+                    <p>Choose a session from the sidebar to view its messages and history.</p>
+                </div>
+            `;
+            hideLoading();
+        }
+        
+        // Session Preview Functions
+        function showSessionPreview(session, messages) {
+            previewSessionData = { session, messages };
+            
+            document.getElementById('modalSessionName').textContent = session.name || 'Unnamed Session';
+            
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="preview-messages">
+                    ${messages.slice(0, 5).map(msg => {
+                        if (msg.type === 'agent') {
+                            return `<div class="preview-message agent">
+                                <div class="preview-avatar">${getAgentAvatar()}</div>
+                                <div class="preview-content">${msg.content.substring(0, 200)}${msg.content.length > 200 ? '...' : ''}</div>
+                            </div>`;
+                        } else if (msg.type === 'user') {
+                            return `<div class="preview-message user">
+                                <div class="preview-avatar">U</div>
+                                <div class="preview-content">${msg.content}</div>
+                            </div>`;
+                        } else {
+                            return `<div class="preview-message system">
+                                <div class="preview-avatar">S</div>
+                                <div class="preview-content">${msg.content}</div>
+                            </div>`;
+                        }
+                    }).join('')}
+                    ${messages.length > 5 ? `<div class="preview-more">... and ${messages.length - 5} more messages</div>` : ''}
+                </div>
+                <div class="preview-info">
+                    <p><strong>Working Directory:</strong> ${session.working_directory || 'Unknown'}</p>
+                    <p><strong>Started:</strong> ${new Date(session.start_time).toLocaleString()}</p>
+                    <p><strong>Total Messages:</strong> ${messages.length}</p>
+                </div>
+            `;
+            
+            document.getElementById('sessionPreviewModal').style.display = 'flex';
+        }
+        
+        function closeSessionPreview() {
+            document.getElementById('sessionPreviewModal').style.display = 'none';
+            previewSessionData = null;
+        }
+        
+        function startSessionFromPreview() {
+            if (!previewSessionData) return;
+            
+            closeSessionPreview();
+            
+            // Store session info in localStorage for the agent page to use
+            localStorage.setItem('sessionHistoryData', JSON.stringify({
+                working_directory: previewSessionData.session.working_directory,
+                session_name: previewSessionData.session.name
+            }));
+            
+            // Redirect to agent page
+            window.location.href = `/${currentAgentType}`;
+        }
+        
+        // Action Functions
+        function startNewSession() {
+            if (!currentSession) return;
+            
+            // Store session info in localStorage for the agent page to use
+            localStorage.setItem('sessionHistoryData', JSON.stringify({
+                working_directory: currentSession.working_directory,
+                session_name: currentSession.name
+            }));
+            
+            // Redirect to agent page
+            window.location.href = `/${currentAgentType}`;
+        }
+        
+        function resumeSession() {
+            if (!currentSession || !currentSession.agent_api_session_id) {
+                showToast('Error', 'Cannot resume session - no agent API session ID available', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const resumeBtn = document.getElementById('resumeSessionBtn');
+            const originalText = resumeBtn.textContent;
+            resumeBtn.textContent = '🔄 Resuming...';
+            resumeBtn.disabled = true;
+            
+            // Show toast notification
+            showToast('Resuming Session', 'Redirecting to agent interface to resume session...', 'info');
+            
+            // Small delay to show the loading state
+            setTimeout(() => {
+                // Redirect directly to agent interface with resume parameters
+                const resumeParams = new URLSearchParams({
+                    resume: 'true',
+                    session_id: currentSession.id,
+                    agent_api_session_id: currentSession.agent_api_session_id,
+                    working_directory: currentSession.working_directory || '',
+                    session_name: currentSession.name || ''
+                });
+                
+                // Redirect to agent page with resume parameters
+                window.location.href = `/${currentAgentType}?${resumeParams.toString()}`;
+            }, 500);
+        }
+        
+        function exportSession() {
+            if (!currentSession || !currentMessages) return;
+            
+            const exportData = {
+                session: currentSession,
+                messages: currentMessages,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${currentAgentType}_session_${currentSession.id}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showToast('Success', 'Session exported successfully', 'success');
+        }
+        
+        function refreshSession() {
+            if (currentSessionId) {
+                loadSessionData(currentSessionId);
+            } else {
+                loadSessions();
+            }
+        }
+        
+        function clearOldSessions() {
+            // This would call an API endpoint to clear old sessions
+            showToast('Feature Coming Soon', 'Clear old sessions functionality will be available soon', 'info');
+        }
+        
+        function deleteSession(sessionId, event) {
+            // Prevent the session item click event from firing
+            event.stopPropagation();
+            
+            // Show confirmation dialog
+            if (!confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+                return;
+            }
+            
+            // Show loading state
+            showToast('Deleting', 'Deleting session...', 'info');
+            
+            // Make API call to delete session
+            fetch(`/api/sessions/${currentAgentType}/${sessionId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast('Success', 'Session deleted successfully', 'success');
+                
+                // If we deleted the currently viewed session, clear the view
+                if (sessionId === currentSessionId) {
+                    currentSessionId = null;
+                    currentSession = null;
+                    currentMessages = [];
+                    showSessionList();
+                }
+                
+                // Reload the session list
+                loadSessions();
+            })
+            .catch(error => {
+                console.error('Error deleting session:', error);
+                showToast('Error', 'Failed to delete session', 'error');
+            });
+        }
+        
+        // Utility Functions
+        function getAgentAvatar() {
+            switch(currentAgentType) {
+                case 'claude': return 'C';
+                case 'gemini': return 'G';
+                case 'cursor': return 'CU';
+                case 'codex': return 'CX';
+                default: return 'A';
+            }
+        }
+        
+        function hideLoading() {
+            const loading = document.getElementById('loadingMessages');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+            hideLoading();
+        }
+        
+        function showToast(title, message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+        
+        // Connection Panel Session History Functions (for compatibility)
+        function toggleConnectionHistory() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+        
+        function loadConnectionSessions() {
+            loadSessions();
+        }
+        
+        function viewConnectionSession(sessionId) {
+            // For compatibility with connection screen
+            currentSessionId = sessionId;
+            loadSessionData(sessionId);
+        }
+        
+        function startSessionFromHistory(workingDirectory, sessionName) {
+            // Store session info in localStorage for the agent page to use
+            localStorage.setItem('sessionHistoryData', JSON.stringify({
+                working_directory: workingDirectory,
+                session_name: sessionName
+            }));
+            
+            // Redirect to agent page
+            window.location.href = `/${currentAgentType}`;
+        }
+        
+        // Responsive Header Controls Functions
+        function initializeResponsiveHeader() {
+            const headerControls = document.getElementById('headerControls');
+            const headerControlsToggle = document.getElementById('headerControlsToggle');
+            const headerControlsDropdown = document.getElementById('headerControlsDropdown');
+            
+            if (!headerControls) return;
+            
+            // Set initial state based on screen width
+            updateHeaderControlsState();
+            
+            // Listen for window resize events
+            window.addEventListener('resize', debounce(updateHeaderControlsState, 250));
+            
+                    // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const sessionActionsContainer = document.getElementById('sessionActionsContainer');
+            if (headerControls && sessionActionsContainer && !headerControls.contains(event.target) && sessionActionsContainer.classList.contains('show')) {
+                closeHeaderDropdown();
+            }
+        });
+        
+        // Prevent dropdown from closing when clicking inside it
+        const sessionActionsContainer = document.getElementById('sessionActionsContainer');
+        if (sessionActionsContainer) {
+            sessionActionsContainer.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+        }
+        
+        function updateHeaderControlsState() {
+            const headerControls = document.getElementById('headerControls');
+            
+            if (!headerControls) return;
+            
+            // Check if header controls are overflowing
+            const isOverflowing = checkHeaderOverflow();
+            const isSmallScreen = window.innerWidth < 1024;
+            
+            if (isSmallScreen || isOverflowing) {
+                headerControls.classList.add('collapsed');
+            } else {
+                headerControls.classList.remove('collapsed');
+                closeHeaderDropdown();
+            }
+        }
+        
+        function checkHeaderOverflow() {
+            const headerControls = document.getElementById('headerControls');
+            if (!headerControls) return false;
+            
+            // Get the container width and controls width
+            const container = headerControls.parentElement;
+            const containerWidth = container.offsetWidth;
+            const controlsWidth = headerControls.scrollWidth;
+            
+            // Check if controls are wider than available space
+            return controlsWidth > containerWidth;
+        }
+        
+        function toggleHeaderControls(event) {
+            event.preventDefault();
+            
+            const headerControlsToggle = document.getElementById('headerControlsToggle');
+            const sessionActionsContainer = document.getElementById('sessionActionsContainer');
+            
+            if (sessionActionsContainer && sessionActionsContainer.classList.contains('show')) {
+                closeHeaderDropdown();
+            } else {
+                openHeaderDropdown();
+            }
+        }
+        
+        function openHeaderDropdown() {
+            const headerControlsToggle = document.getElementById('headerControlsToggle');
+            const sessionActionsContainer = document.getElementById('sessionActionsContainer');
+            
+            if (headerControlsToggle) headerControlsToggle.classList.add('active');
+            if (sessionActionsContainer) sessionActionsContainer.classList.add('show');
+        }
+        
+        function closeHeaderDropdown() {
+            const headerControlsToggle = document.getElementById('headerControlsToggle');
+            const sessionActionsContainer = document.getElementById('sessionActionsContainer');
+            
+            if (headerControlsToggle) headerControlsToggle.classList.remove('active');
+            if (sessionActionsContainer) sessionActionsContainer.classList.remove('show');
+        }
+        
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+    
+    <!-- Mobile Scaling Script -->
+    <script src="{{ url_for('static', filename='js/mobile-scaling.js') }}"></script>
+</body>
+</html>

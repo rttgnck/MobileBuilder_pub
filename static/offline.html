@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobileBuilder - Offline</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+            background: rgba(0, 0, 0, 0.95);
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f9fafb;
+            text-align: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .offline-container {
+            max-width: 500px;
+            padding: 40px;
+            animation: fadeIn 0.6s ease-out;
+            background: rgba(25, 25, 25, 0.75);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border-radius: 24px;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+            box-shadow: 
+                0 24px 48px rgba(0, 0, 0, 0.6),
+                inset 0 0 0 1px rgba(99, 102, 241, 0.08);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .offline-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #f9fafb;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #d1d5db;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        
+        .features {
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+        
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            width: 2rem;
+            text-align: center;
+        }
+        
+        .feature-text {
+            flex: 1;
+            color: #d1d5db;
+        }
+        
+        .retry-button {
+            background: linear-gradient(135deg, #6366f1, #f59e0b);
+            border: none;
+            color: #1a1a2e;
+            padding: 14px 32px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            margin-top: 1.5rem;
+            box-shadow: 
+                0 8px 24px rgba(99, 102, 241, 0.3),
+                0 4px 12px rgba(245, 158, 11, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .retry-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .retry-button:hover::before {
+            left: 100%;
+        }
+        
+        .retry-button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 32px rgba(99, 102, 241, 0.4),
+                0 6px 16px rgba(245, 158, 11, 0.3);
+        }
+        
+        .retry-button:active {
+            transform: translateY(-1px) scale(1.01);
+        }
+        
+        .connection-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(20, 20, 20, 0.6);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(156, 163, 175, 0.2);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+            margin-right: 0.5rem;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            51%, 100% {
+                opacity: 0.3;
+            }
+        }
+        
+        .status-indicator.online {
+            background: #10b981;
+            animation: none;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .offline-container {
+                padding: 30px 24px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .offline-icon {
+                font-size: 4rem;
+            }
+            
+            .retry-button {
+                padding: 12px 28px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .offline-container {
+                padding: 24px 20px;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            
+            .retry-button {
+                padding: 11px 24px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📱</div>
+        <h1>You're Offline</h1>
+        <p class="subtitle">MobileBuilder requires an internet connection to access AI agents and sync your sessions.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">Your data is safely stored locally</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text">App will sync when connection returns</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-text">Session history preserved</div>
+            </div>
+        </div>
+        
+        <div class="connection-status">
+            <span class="status-indicator" id="status-indicator"></span>
+            <span id="connection-text">Checking connection...</span>
+        </div>
+        
+        <button class="retry-button" onclick="checkConnectionAndReload()">Try Again</button>
+    </div>
+
+    <script>
+        let connectionCheckInterval;
+        
+        function checkConnection() {
+            return fetch('/api/status', {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            }).then(response => {
+                return response.ok;
+            }).catch(() => {
+                return false;
+            });
+        }
+        
+        function updateConnectionStatus(isOnline) {
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('connection-text');
+            
+            if (isOnline) {
+                indicator.classList.add('online');
+                text.textContent = 'Connection restored!';
+                
+                // Auto-reload after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                indicator.classList.remove('online');
+                text.textContent = 'No internet connection';
+            }
+        }
+        
+        function checkConnectionAndReload() {
+            const button = document.querySelector('.retry-button');
+            const originalText = button.textContent;
+            
+            button.textContent = 'Checking...';
+            button.disabled = true;
+            
+            checkConnection().then(isOnline => {
+                if (isOnline) {
+                    button.textContent = 'Connected! Reloading...';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    updateConnectionStatus(false);
+                }
+            });
+        }
+        
+        // Check connection periodically
+        function startConnectionMonitoring() {
+            connectionCheckInterval = setInterval(() => {
+                checkConnection().then(updateConnectionStatus);
+            }, 5000);
+        }
+        
+        // Initial connection check
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                checkConnection().then(updateConnectionStatus);
+                startConnectionMonitoring();
+            }, 1000);
+        });
+        
+        // Listen for online/offline events
+        window.addEventListener('online', () => {
+            updateConnectionStatus(true);
+        });
+        
+        window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
+        });
+        
+        // Clean up interval on page unload
+        window.addEventListener('beforeunload', () => {
+            if (connectionCheckInterval) {
+                clearInterval(connectionCheckInterval);
+            }
+        });
+    </script>
+</body>
+</html>

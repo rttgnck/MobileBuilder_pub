@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "approve-tools": {
+      "command": "python",
+      "args": ["/absolute/path/to/MobileBuilder/agents/approve_tools.py"]
+    }
+  }
+}

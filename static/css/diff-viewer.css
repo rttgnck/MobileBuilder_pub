@@ -1,0 +1,454 @@
+/* Diff Viewer Styles */
+.diff-viewer {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 10px 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.diff-header {
+    background: var(--header-bg);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.diff-file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.diff-file-path {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.diff-file-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.diff-change-type {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.diff-change-type.created {
+    background: #d4edda;
+    color: #155724;
+}
+
+.diff-change-type.modified {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.diff-change-type.deleted {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.diff-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.diff-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.diff-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.diff-status.accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.diff-status.denied {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.diff-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.diff-btn:hover {
+    transform: translateY(-1px);
+}
+
+.diff-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.diff-btn.accept {
+    background: #28a745;
+    color: white;
+}
+
+.diff-btn.accept:hover:not(:disabled) {
+    background: #218838;
+}
+
+.diff-btn.deny {
+    background: #dc3545;
+    color: white;
+}
+
+.diff-btn.deny:hover:not(:disabled) {
+    background: #c82333;
+}
+
+.diff-btn.toggle {
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-color);
+    border: 1px solid var(--border-color);
+}
+
+.diff-btn.toggle:hover:not(:disabled) {
+    background: var(--button-secondary-hover-bg);
+}
+
+.diff-content {
+    max-height: 500px;
+    overflow-y: auto;
+    background: var(--code-bg);
+}
+
+.diff-content.collapsed {
+    display: none;
+}
+
+.diff-line {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.diff-line-number {
+    background: var(--line-number-bg);
+    color: var(--line-number-color);
+    padding: 2px 8px;
+    text-align: right;
+    min-width: 50px;
+    font-size: 11px;
+    user-select: none;
+    border-right: 1px solid var(--border-color);
+}
+
+.diff-line-content {
+    flex: 1;
+    padding: 2px 12px;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* Line type styles */
+.diff-line.added {
+    background: #e6ffed;
+}
+
+.diff-line.added .diff-line-number {
+    background: #cdffd8;
+    border-right-color: #28a745;
+}
+
+.diff-line.added .diff-line-content {
+    color: #22863a;
+}
+
+.diff-line.added .diff-line-content::before {
+    content: '+';
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.diff-line.removed {
+    background: #ffeef0;
+}
+
+.diff-line.removed .diff-line-number {
+    background: #ffdce0;
+    border-right-color: #d73a49;
+}
+
+.diff-line.removed .diff-line-content {
+    color: #b31d28;
+}
+
+.diff-line.removed .diff-line-content::before {
+    content: '-';
+    color: #d73a49;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.diff-line.context {
+    background: var(--code-bg);
+}
+
+.diff-line.context .diff-line-content::before {
+    content: ' ';
+    margin-right: 8px;
+}
+
+.diff-line.hunk-header {
+    background: #f1f8ff;
+    border-top: 1px solid #c8e1ff;
+    border-bottom: 1px solid #c8e1ff;
+}
+
+.diff-line.hunk-header .diff-line-content {
+    color: #0366d6;
+    font-weight: 500;
+}
+
+.diff-line.hunk-header .diff-line-content::before {
+    content: '@';
+    color: #0366d6;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* No changes message */
+.diff-no-changes {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Bulk actions */
+.diff-bulk-actions {
+    background: var(--header-bg);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.diff-bulk-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.diff-bulk-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.diff-bulk-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.diff-bulk-btn.accept-all {
+    background: #28a745;
+    color: white;
+}
+
+.diff-bulk-btn.accept-all:hover:not(:disabled) {
+    background: #218838;
+}
+
+.diff-bulk-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* File change indicator */
+.file-change-indicator {
+    position: relative;
+    display: inline-block;
+}
+
+.file-change-indicator::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #ff6b6b;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.file-change-indicator.accepted::after {
+    background: #28a745;
+}
+
+.file-change-indicator.denied::after {
+    background: #dc3545;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .diff-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .diff-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .diff-bulk-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .diff-bulk-buttons {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .diff-line-number {
+        min-width: 40px;
+        padding: 2px 6px;
+    }
+    
+    .diff-line-content {
+        padding: 2px 8px;
+        font-size: 12px;
+    }
+}
+
+/* Dark theme adjustments */
+body.dark-theme .diff-viewer {
+    --bg-color: #1e1e1e;
+    --header-bg: #2d2d2d;
+    --border-color: #404040;
+    --text-color: #ffffff;
+    --text-muted: #cccccc;
+    --code-bg: #1e1e1e;
+    --line-number-bg: #2d2d2d;
+    --line-number-color: #888888;
+    --button-secondary-bg: #404040;
+    --button-secondary-color: #ffffff;
+    --button-secondary-hover-bg: #505050;
+}
+
+body.dark-theme .diff-line.added {
+    background: #1b4332;
+}
+
+body.dark-theme .diff-line.added .diff-line-number {
+    background: #2d5a3d;
+}
+
+body.dark-theme .diff-line.added .diff-line-content {
+    color: #7bc96f;
+}
+
+body.dark-theme .diff-line.removed {
+    background: #4a1a1a;
+}
+
+body.dark-theme .diff-line.removed .diff-line-number {
+    background: #5d2a2a;
+}
+
+body.dark-theme .diff-line.removed .diff-line-content {
+    color: #f97583;
+}
+
+body.dark-theme .diff-line.hunk-header {
+    background: #1c2951;
+    border-color: #264f78;
+}
+
+body.dark-theme .diff-line.hunk-header .diff-line-content {
+    color: #79b8ff;
+}
+
+/* Light theme defaults */
+body:not(.dark-theme) .diff-viewer {
+    --bg-color: #ffffff;
+    --header-bg: #f8f9fa;
+    --border-color: #e1e4e8;
+    --text-color: #24292e;
+    --text-muted: #6a737d;
+    --code-bg: #ffffff;
+    --line-number-bg: #f6f8fa;
+    --line-number-color: #6a737d;
+    --button-secondary-bg: #fafbfc;
+    --button-secondary-color: #24292e;
+    --button-secondary-hover-bg: #f3f4f6;
+}
+
+/* Animation for new diffs */
+.diff-viewer.new-diff {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Notification badge for pending diffs */
+.diff-notification-badge {
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+    display: inline-block;
+    margin-left: 6px;
+}

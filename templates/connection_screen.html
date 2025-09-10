@@ -1,0 +1,100 @@
+<!-- Connection Screen -->
+<div class="connection-screen" id="connectionScreen">
+    <div class="connection-panel">
+        <div class="connection-logo" id="connectionLogo"></div>
+        <h2 class="connection-title" id="connectionTitle"></h2>
+        <p class="connection-subtitle" id="connectionSubtitle"></p>
+        
+        <div id="existingSessionNotice" class="existing-session-notice" style="display: none;">
+            <h4>Active Session Detected</h4>
+            <p style="font-size: 13px; color: #ccc;">An active <span id="agentNameNotice"></span> session is already running. You can connect to it or start a new session.</p>
+            <button class="btn-primary" onclick="connectToExisting()" style="margin-top: 10px;">
+                Connect to Existing Session
+            </button>
+        </div>
+        
+        <div class="connection-status" id="connectionStatus" style="margin-bottom: 15px; text-align: center; color: #666; font-size: 13px;">
+            <div class="status-indicator">
+                <span class="status-dot" id="connectionStatusDot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff6b35; margin-right: 8px;"></span>
+                <span id="connectionStatusText">Connecting to server...</span>
+            </div>
+        </div>
+
+        <form id="connectionForm">
+            <div class="form-group">
+                <label class="form-label">Session Name (optional)</label>
+                <input type="text" 
+                       class="form-input" 
+                       id="sessionName"
+                       placeholder="e.g., Project Development">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Working Directory</label>
+                <input type="text" 
+                       class="form-input" 
+                       id="workingDirectory"
+                       value="{{ DEFAULT_WORKING_DIR }}"
+                       required>
+                <div class="form-hint">Enter the directory where <span id="agentNameHint"></span> will operate</div>
+            </div>
+            
+            <button type="submit" class="btn-primary" id="connectButton">
+                Connect to <span id="connectButtonText"></span>
+            </button>
+        </form>
+        
+        <div class="back-to-home">
+            <a href="/" class="btn-secondary">←</a>
+        </div>
+        
+        <!-- Connection Panel Session History -->
+        <div class="connection-session-history" id="connectionSessionHistory" style="display: none;">
+            <div class="connection-history-header">
+                <h4>Session History</h4>
+                <button class="btn-secondary" onclick="loadConnectionSessions()">Refresh</button>
+            </div>
+            <div class="connection-session-list" id="connectionSessionList">
+                <!-- Past sessions will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="connection-actions">
+            <button class="btn-secondary" id="showHistoryBtn" onclick="toggleConnectionHistory()">
+                📚 View Session History
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Connection Panel Session History Functions
+    function toggleConnectionHistory() {
+        const historySection = document.getElementById('connectionSessionHistory');
+        const showHistoryBtn = document.getElementById('showHistoryBtn');
+        
+        if (historySection.style.display === 'none') {
+            historySection.style.display = 'block';
+            showHistoryBtn.textContent = '📚 Hide Session History';
+            loadConnectionSessions();
+        } else {
+            historySection.style.display = 'none';
+            showHistoryBtn.textContent = '📚 View Session History';
+        }
+    }
+    
+    function loadConnectionSessions() {
+        // This function will be overridden by each agent template
+        console.log('loadConnectionSessions called - should be overridden');
+    }
+    
+    function viewConnectionSession(sessionId) {
+        // This function will be overridden by each agent template
+        console.log('viewConnectionSession called - should be overridden');
+    }
+    
+    function connectToExisting() {
+        // This function will be overridden by each agent template
+        console.log('connectToExisting called - should be overridden');
+    }
+</script>

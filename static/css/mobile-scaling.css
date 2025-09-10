@@ -1,0 +1,507 @@
+/* Mobile Scaling Theme - Clean Small Panel */
+/* Provides different scaling levels for mobile devices */
+
+/* Scaling Variables */
+:root {
+    /* Default scaling (100%) */
+    --scale-factor: 1;
+    --scale-factor-xxs: 0.5;   /* 50% - Extra extra small */
+    --scale-factor-xs: 0.6;    /* 60% - Extra small */
+    --scale-factor-sm: 0.7;    /* 70% - Small */
+    --scale-factor-md: 0.8;    /* 80% - Medium */
+    --scale-factor-lg: 0.9;    /* 90% - Large */
+    --scale-factor-xl: 1.0;    /* 100% - Extra large (normal) */
+    
+    /* Scaling transition */
+    --scale-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base scaling class - applies to the entire interface */
+.mobile-scaled {
+    transform-origin: top left;
+    transition: var(--scale-transition);
+}
+
+/* Scaling size classes */
+.mobile-scale-xxs {
+    --scale-factor: var(--scale-factor-xxs);
+}
+
+.mobile-scale-xs {
+    --scale-factor: var(--scale-factor-xs);
+}
+
+.mobile-scale-sm {
+    --scale-factor: var(--scale-factor-sm);
+}
+
+.mobile-scale-md {
+    --scale-factor: var(--scale-factor-md);
+}
+
+.mobile-scale-lg {
+    --scale-factor: var(--scale-factor-lg);
+}
+
+.mobile-scale-xl {
+    --scale-factor: var(--scale-factor-xl);
+}
+
+/* Apply scaling to the main container with proper centering */
+.mobile-scaled .container {
+    transform: scale(var(--scale-factor));
+    transform-origin: center center;
+    width: calc(100vw / var(--scale-factor));
+    height: calc(100vh / var(--scale-factor));
+    max-width: calc(1400px / var(--scale-factor));
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--scale-factor));
+    z-index: 1;
+}
+
+/* Ensure body and html take full space for proper scaling */
+.mobile-scaled {
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+.mobile-scaled body {
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* Connection screen scaling support */
+.mobile-scaled .connection-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    transform: scale(var(--scale-factor));
+    transform-origin: center center;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.mobile-scaled .connection-panel {
+    transform: none; /* Reset any existing transforms */
+    position: relative;
+    z-index: 1001;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+/* Ensure scaling controls are always visible and properly positioned */
+.scaling-handle,
+.scaling-panel,
+.scaling-backdrop {
+    z-index: 10002 !important; /* Higher than connection screen */
+}
+
+/* Alternative page zoom approach */
+.mobile-zoom-xxs { zoom: 0.5; }
+.mobile-zoom-xs { zoom: 0.6; }
+.mobile-zoom-sm { zoom: 0.7; }
+.mobile-zoom-md { zoom: 0.8; }
+.mobile-zoom-lg { zoom: 0.9; }
+.mobile-zoom-xl { zoom: 1.0; }
+
+/* Small Slide-out Scaling Controls */
+.scaling-panel {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translate(100%, -50%);
+    width: 200px;
+    background: var(--bg-secondary);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+    padding: var(--spacing-lg);
+    gap: var(--spacing-sm);
+}
+
+.scaling-panel.open {
+    transform: translate(0, -50%);
+}
+
+.scaling-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.scaling-method-section {
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+}
+
+.scaling-button {
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-sans);
+}
+
+.scaling-button:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.scaling-button.active {
+    background: var(--primary-color);
+    color: var(--bg-primary);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.scaling-button:active {
+    transform: translateY(0);
+}
+
+.scaling-button.method-toggle {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--secondary-color);
+    font-size: var(--text-xs);
+}
+
+.scaling-button.method-toggle:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: var(--secondary-color);
+}
+
+.scaling-button.method-toggle.active {
+    background: var(--secondary-color);
+    color: var(--bg-primary);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Remove tooltip labels for cleaner look */
+
+/* Small Frosted Glass Handle */
+.scaling-handle {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 1001;
+    width: 32px;
+    height: 60px;
+    background: var(--bg-secondary);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-50%);
+}
+
+.scaling-handle:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-50%) translateX(-3px);
+    box-shadow: -8px 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.scaling-handle:active {
+    transform: translateY(-50%) translateX(-1px);
+}
+
+.scaling-handle-icon {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: var(--font-bold);
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    font-family: var(--font-family-sans);
+}
+
+.scaling-handle:hover .scaling-handle-icon {
+    opacity: 1;
+}
+
+.scaling-handle.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.scaling-handle.active .scaling-handle-icon {
+    color: var(--bg-primary);
+    opacity: 1;
+}
+
+/* Backdrop overlay - lighter for small panel */
+.scaling-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.scaling-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile-specific scaling adjustments */
+@media (max-width: 768px) {
+    .scaling-panel {
+        width: 180px;
+    }
+    
+    .scaling-handle {
+        width: 28px;
+        height: 50px;
+    }
+    
+    .scaling-handle-icon {
+        font-size: 10px;
+    }
+    
+    .scaling-button {
+        height: 32px;
+        font-size: var(--text-xs);
+    }
+    
+    /* Ensure scaling doesn't break mobile layout */
+    .mobile-scaled .container {
+        min-width: 320px; /* Minimum mobile width */
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .scaling-panel {
+        width: 160px;
+        padding: var(--spacing-sm);
+    }
+    
+    .scaling-button {
+        height: 28px;
+        font-size: 10px;
+    }
+    
+    .scaling-handle {
+        width: 24px;
+        height: 40px;
+    }
+    
+    .scaling-handle-icon {
+        font-size: 8px;
+    }
+}
+
+/* Scaling-specific responsive adjustments */
+.mobile-scale-xxs .container {
+    /* Extra extra small scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-xxs));
+}
+
+.mobile-scale-xs .container {
+    /* Extra small scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-xs));
+}
+
+.mobile-scale-sm .container {
+    /* Small scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-sm));
+}
+
+.mobile-scale-md .container {
+    /* Medium scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-md));
+}
+
+.mobile-scale-lg .container {
+    /* Large scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-lg));
+}
+
+.mobile-scale-xl .container {
+    /* Extra large scaling adjustments */
+    border-radius: calc(var(--radius-3xl) * var(--scale-factor-xl));
+}
+
+/* Prevent scaling on desktop and non-PWA mode */
+@media (min-width: 1025px) {
+    .scaling-handle,
+    .scaling-panel,
+    .scaling-backdrop {
+        display: none !important;
+    }
+    
+    .mobile-scaled {
+        transform: none !important;
+    }
+    
+    .mobile-scaled .container {
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+
+/* Hide scaling controls when not in PWA mode */
+body:not(.pwa-mode) .scaling-handle,
+body:not(.pwa-mode) .scaling-panel,
+body:not(.pwa-mode) .scaling-backdrop {
+    display: none !important;
+}
+
+body:not(.pwa-mode) .mobile-scaled {
+    transform: none !important;
+}
+
+body:not(.pwa-mode) .mobile-scaled .container {
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Remove old animations - using CSS transitions instead */
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .mobile-scaled,
+    .scaling-panel,
+    .scaling-button,
+    .scaling-handle {
+        transition: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .scaling-panel {
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #fff;
+    }
+    
+    .scaling-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid #fff;
+    }
+    
+    .scaling-button.active {
+        background: #fff;
+        color: #000;
+    }
+}
+
+/* Light mode adjustments */
+@media (prefers-color-scheme: light) {
+    .scaling-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .scaling-button {
+        background: rgba(0, 0, 0, 0.1);
+        color: #000;
+    }
+    
+    .scaling-button:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .scaling-button.active {
+        background: var(--primary-color);
+        color: #fff;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .scaling-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .scaling-handle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .scaling-button:hover {
+        transform: none;
+        background: var(--bg-tertiary);
+    }
+    
+    .scaling-handle:hover {
+        transform: translateY(-50%);
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .scaling-panel {
+        width: 160px;
+    }
+    
+    .scaling-handle {
+        width: 24px;
+        height: 40px;
+    }
+}
+
+/* Print styles - hide scaling controls */
+@media print {
+    .scaling-handle,
+    .scaling-panel,
+    .scaling-backdrop {
+        display: none !important;
+    }
+    
+    .mobile-scaled {
+        transform: none !important;
+    }
+    
+    .mobile-scaled .container {
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+}

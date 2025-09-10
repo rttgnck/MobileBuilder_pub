@@ -1,0 +1,568 @@
+/* Claude Theme - Dark Frosted Glass Yellow/Black Synthwave */
+/* Based on the beautiful old-style.css design with Claude-specific colors */
+
+:root {
+    /* Claude Brand Colors - Dark Yellow/Black Synthwave */
+    --claude-primary: #ffd700;
+    --claude-primary-dark: #ffb300;
+    --claude-primary-light: #ffe55c;
+    --claude-secondary: #ff8c00;
+    --claude-secondary-dark: #ff6f00;
+    --claude-secondary-light: #ffb74d;
+    
+    /* Claude Accent Colors */
+    --claude-accent: #ff6b35;
+    --claude-accent-dark: #e55a2b;
+    --claude-accent-light: #ff8a65;
+    
+    /* Claude Background Colors - Dark Frosted Glass */
+    --claude-bg-primary: rgba(0, 0, 0, 0.95);
+    --claude-bg-secondary: rgba(18, 18, 18, 0.75);
+    --claude-bg-tertiary: rgba(25, 25, 25, 0.6);
+    --claude-bg-dark: rgba(10, 10, 10, 0.6);
+    --claude-bg-glass: rgba(255, 215, 0, 0.1);
+    --claude-bg-glass-dark: rgba(0, 0, 0, 0.4);
+    
+    /* Claude Text Colors */
+    --claude-text-primary: #ffd700;
+    --claude-text-secondary: #ffb74d;
+    --claude-text-muted: #ffcc80;
+    --claude-text-light: #ffffff;
+    
+    /* Claude Border Colors */
+    --claude-border: rgba(255, 215, 0, 0.15);
+    --claude-border-dark: rgba(255, 179, 0, 0.3);
+    --claude-border-light: rgba(255, 215, 0, 0.08);
+    
+    /* Claude Shadow Colors */
+    --claude-shadow: rgba(255, 215, 0, 0.2);
+    --claude-shadow-dark: rgba(255, 215, 0, 0.4);
+    --claude-shadow-light: rgba(255, 215, 0, 0.1);
+    --claude-glow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Session Viewer CSS Custom Properties for Claude Theme */
+.claude-theme {
+    /* Base Colors */
+    --bg-primary: var(--claude-bg-primary);
+    --bg-secondary: var(--claude-bg-secondary);
+    --bg-tertiary: var(--claude-bg-tertiary);
+    --bg-dark: var(--claude-bg-dark);
+    --bg-hover: rgba(255, 215, 0, 0.05);
+    --bg-active: rgba(255, 215, 0, 0.1);
+    
+    /* Text Colors */
+    --text-primary: var(--claude-text-primary);
+    --text-secondary: var(--claude-text-secondary);
+    --text-muted: var(--claude-text-muted);
+    --text-light: var(--claude-text-light);
+    
+    /* Border Colors */
+    --border: var(--claude-border);
+    --border-hover: var(--claude-border-dark);
+    
+    /* Primary/Secondary Colors */
+    --primary: var(--claude-primary);
+    --secondary: var(--claude-secondary);
+    
+    /* Message Colors */
+    --message-bg: rgba(25, 25, 25, 0.8);
+    --message-border: rgba(255, 215, 0, 0.08);
+    --message-text: var(--claude-text-secondary);
+    
+    --user-message-bg: rgba(255, 215, 0, 0.05);
+    --user-message-border: var(--claude-border);
+    --user-message-text: var(--claude-text-primary);
+    
+    --agent-message-bg: rgba(25, 25, 25, 0.9);
+    --agent-message-text: var(--claude-text-secondary);
+    
+    --system-message-bg: rgba(100, 100, 100, 0.2);
+    --system-message-text: #888;
+    --system-message-border: rgba(100, 100, 100, 0.3);
+    
+    /* Avatar Colors */
+    --avatar-bg: rgba(255, 215, 0, 0.1);
+    --avatar-border: var(--claude-border);
+    --avatar-text: var(--claude-text-primary);
+    
+    /* Toast Colors */
+    --toast-bg: rgba(25, 25, 25, 0.95);
+    --toast-border: var(--claude-border);
+    --toast-text: #fff;
+    --toast-title: var(--claude-text-primary);
+    --toast-message: var(--claude-text-secondary);
+    
+    /* Modal Colors */
+    --modal-bg: rgba(25, 25, 25, 0.95);
+    --modal-border: var(--claude-border);
+    
+    /* Preview Colors */
+    --preview-bg: rgba(255, 215, 0, 0.05);
+    --preview-more-bg: rgba(255, 215, 0, 0.05);
+    --preview-info-bg: rgba(255, 215, 0, 0.05);
+    
+    /* Warning/Error/Success Colors */
+    --warning-color: var(--claude-secondary);
+    --warning-bg: rgba(255, 140, 0, 0.1);
+    --error-color: #ff3333;
+    --error-bg: rgba(255, 51, 51, 0.1);
+    --success-color: #51cf66;
+    --success-bg: rgba(81, 207, 102, 0.1);
+    
+    /* Hover States */
+    --bg-tertiary-hover: rgba(255, 215, 0, 0.15);
+}
+
+/* Claude-specific body styling */
+body.claude-theme {
+    background: var(--claude-bg-primary);
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 204, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 170, 0, 0.05) 0%, transparent 50%);
+    color: var(--claude-text-primary);
+}
+
+.jstree-clicked {
+    background: #4a4b04 !important;
+}
+
+/* Claude container styling */
+.claude-theme .container {
+    background: var(--claude-bg-secondary);
+    border: 1px solid var(--claude-border);
+    box-shadow: 
+        0 24px 48px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 1px rgba(255, 215, 0, 0.08);
+}
+
+/* Claude connection screen */
+.claude-theme .connection-screen {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(18, 18, 18, 0.9));
+}
+
+.claude-theme .connection-panel {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--claude-border);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 0 1px rgba(255, 215, 0, 0.08);
+}
+
+.claude-theme .connection-logo {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    color: var(--claude-bg-primary);
+    box-shadow: 0 8px 24px rgba(255, 204, 0, 0.3);
+}
+
+.claude-theme .connection-title {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.claude-theme .connection-subtitle {
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .btn-primary {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    box-shadow: 0 8px 24px rgba(255, 204, 0, 0.3);
+}
+
+.claude-theme .btn-primary:hover {
+    box-shadow: 0 12px 32px rgba(255, 204, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.claude-theme .connection-session-item:hover {
+    border-color: var(--claude-accent);
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.claude-theme .connection-actions .btn-secondary {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: var(--claude-text-light);
+}
+
+.claude-theme .connection-actions .btn-secondary:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2));
+    border-color: var(--claude-accent);
+}
+
+/* Claude form elements */
+.claude-theme .form-input {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .form-input:focus {
+    border-color: var(--claude-primary);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.claude-theme .form-label {
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .form-hint {
+    color: #666;
+}
+
+/* Claude buttons */
+.claude-theme .btn-primary, .claude-theme .connect-button {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    color: var(--claude-bg-primary);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.claude-theme .btn-primary:hover:not(:disabled), .claude-theme .connect-button:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(255, 204, 0, 0.4);
+}
+
+.claude-theme .btn-secondary {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .btn-secondary:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.claude-theme .btn-danger {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: rgba(255, 51, 51, 0.3);
+    color: #ff6666;
+}
+
+.claude-theme .btn-danger:hover {
+    background: rgba(255, 51, 51, 0.2);
+}
+
+/* Claude header */
+.claude-theme .header {
+    background: var(--claude-bg-dark);
+    border-bottom: 1px solid var(--claude-border);
+}
+
+.claude-theme .logo {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    color: var(--claude-bg-primary);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+/* Claude session timer */
+.claude-theme .session-timer {
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid var(--claude-border);
+}
+
+.claude-theme .timer-value {
+    color: var(--claude-text-primary);
+}
+
+/* Claude status */
+.claude-theme .status {
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid var(--claude-border);
+}
+
+.claude-theme .status-dot {
+    background: var(--claude-primary);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Claude header buttons */
+.claude-theme .header-button {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .header-button:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.claude-theme .header-button.danger {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: rgba(255, 51, 51, 0.3);
+    color: #ff6666;
+}
+
+.claude-theme .header-button.danger:hover {
+    background: rgba(255, 51, 51, 0.2);
+}
+
+/* Claude sidebar */
+.claude-theme .sidebar {
+    background: var(--claude-bg-dark);
+    border-right: 1px solid var(--claude-border);
+}
+
+.claude-theme .sidebar-header {
+    border-bottom: 1px solid var(--claude-border);
+}
+
+.claude-theme .sidebar-title {
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .sidebar-button {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .sidebar-button:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+/* Claude session items */
+.claude-theme .session-item {
+    background: var(--claude-bg-tertiary);
+    border: 1px solid rgba(100, 100, 100, 0.2);
+}
+
+.claude-theme .session-item:hover {
+    background: rgba(255, 215, 0, 0.05);
+    border-color: var(--claude-border);
+}
+
+.claude-theme .session-item.active {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--claude-primary);
+}
+
+.claude-theme .session-name {
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .session-meta {
+    color: #666;
+}
+
+/* Claude chat container */
+.claude-theme .chat-container {
+    background: rgba(5, 5, 5, 0.3);
+}
+
+/* Claude messages */
+.claude-theme .message-avatar {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .message.user .message-avatar {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 170, 0, 0.2));
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.claude-theme .message.claude .message-avatar {
+    background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(255, 100, 0, 0.2));
+    border-color: rgba(255, 140, 0, 0.3);
+}
+
+.claude-theme .message.system .message-avatar {
+    background: rgba(100, 100, 100, 0.2);
+    color: #888;
+    border-color: rgba(100, 100, 100, 0.3);
+}
+
+.claude-theme .message-content {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 215, 0, 0.08);
+}
+
+.claude-theme .message.user .message-content {
+    color: var(--claude-text-primary);
+    background: rgba(255, 215, 0, 0.05);
+    border-color: var(--claude-border);
+}
+
+.claude-theme .message.claude .message-content {
+    color: var(--claude-text-secondary);
+    background: rgba(25, 25, 25, 0.8);
+}
+
+/* Claude input container */
+.claude-theme .input-container {
+    background: var(--claude-bg-dark);
+    border-top: 1px solid var(--claude-border);
+}
+
+.claude-theme .input-field {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--claude-border);
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .input-field:focus {
+    background: rgba(25, 25, 25, 0.9);
+    border-color: var(--claude-primary);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.claude-theme .send-button {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    color: var(--claude-bg-primary);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.claude-theme .send-button:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+}
+
+/* Claude toast notifications */
+.claude-theme .toast {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--claude-border);
+}
+
+.claude-theme .toast.warning {
+    border-color: var(--claude-secondary);
+    background: rgba(255, 170, 0, 0.1);
+}
+
+.claude-theme .toast.danger {
+    border-color: #ff3333;
+    background: rgba(255, 51, 51, 0.1);
+}
+
+.claude-theme .toast-title {
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .toast-message {
+    color: var(--claude-text-secondary);
+}
+
+/* Claude scrollbars */
+.claude-theme ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.claude-theme ::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.claude-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.3);
+}
+
+/* Claude loading spinner */
+.claude-theme .spinner {
+    border-top-color: var(--claude-primary);
+}
+
+/* Claude dialog */
+.claude-theme .dialog {
+    background: rgba(25, 25, 25, 0.95);
+    border: 1px solid var(--claude-border);
+}
+
+.claude-theme .dialog-title {
+    color: var(--claude-text-primary);
+}
+
+.claude-theme .dialog-message {
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .dialog-button.primary {
+    background: linear-gradient(135deg, var(--claude-primary), var(--claude-secondary));
+    color: var(--claude-bg-primary);
+}
+
+.claude-theme .dialog-button.secondary {
+    background: transparent;
+    color: var(--claude-text-secondary);
+    border: 1px solid var(--claude-border);
+}
+
+.claude-theme .dialog-button:hover {
+    transform: translateY(-1px);
+}
+
+/* Claude streaming output enhancements */
+.claude-theme .streaming-output.assistant-message {
+    background: rgba(255, 107, 53, 0.05);
+    border-left-color: var(--claude-primary);
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .streaming-output.final-result {
+    background: rgba(76, 175, 80, 0.1);
+    border-left-color: #4caf50;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.claude-theme .streaming-output pre {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .streaming-output code {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    color: var(--claude-text-secondary);
+}
+
+.claude-theme .response-metadata {
+    color: var(--claude-text-muted);
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* System Message Styles */
+.claude-theme .streaming-output.system-init {
+    background: rgba(33, 150, 243, 0.1);
+    border-left-color: #2196f3;
+    color: #1565c0;
+    font-weight: 500;
+}
+
+.claude-theme .streaming-output.system-message {
+    background: rgba(96, 125, 139, 0.1);
+    border-left-color: #607d8b;
+    color: #37474f;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+/* User Message Styles */
+.claude-theme .streaming-output.user-message {
+    background: rgba(255, 193, 7, 0.1);
+    border-left-color: #ffc107;
+    color: #f57f17;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+/* Other Message Styles */
+.claude-theme .streaming-output.other-message {
+    background: rgba(156, 39, 176, 0.1);
+    border-left-color: #9c27b0;
+    color: #6a1b9a;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+/* Usage Metadata Styles */
+.claude-theme .streaming-output.usage-metadata {
+    background: rgba(63, 81, 181, 0.1);
+    border-left-color: #3f51b5;
+    color: #283593;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 8px 12px;
+    margin-top: 8px;
+}

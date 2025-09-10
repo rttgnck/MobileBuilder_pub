@@ -1,0 +1,1271 @@
+{% extends "agent_base.html" %}
+
+{% block title %}Claude Agent - MobileBuilder{% endblock %}
+
+{% block styles %}
+<style>
+    .special-key {
+        background: linear-gradient(135deg, #ff6b35, #f7931e);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 18px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        box-shadow: 0 3px 12px rgba(255, 107, 53, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .special-key::before {
+        content: "⌨";
+        font-size: 10px;
+        opacity: 0.8;
+    }
+    
+    .special-key:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(255, 107, 53, 0.5);
+    }
+    
+    .command-preview {
+        color: #666;
+        font-size: 10px;
+        margin-left: 8px;
+        opacity: 0.7;
+        font-style: italic;
+    }
+    
+    .headless-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 12px;
+        padding: 4px 8px;
+        background: rgba(255, 107, 53, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+    
+    .headless-badge {
+        background: linear-gradient(135deg, #ff6b35, #f7931e);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .headless-description {
+        color: var(--claude-text-light);
+        font-size: 10px;
+        opacity: 0.8;
+    }
+    
+    .claude-help-section {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 107, 53, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--claude-primary);
+    }
+    
+    .claude-help-section h4 {
+        color: var(--claude-primary);
+        margin: 0 0 10px 0;
+        font-size: 14px;
+    }
+    
+    .claude-help-section ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .claude-help-section li {
+        margin: 5px 0;
+        font-size: 12px;
+        color: var(--claude-text);
+    }
+    
+    /* Streaming Output Styles */
+    .streaming-output {
+        background: rgba(255, 107, 53, 0.05);
+        border-left: 3px solid var(--claude-primary);
+        padding: 8px 12px;
+        margin: 4px 0;
+        border-radius: 4px;
+        /* animation: streaming-pulse 2s infinite; */
+    }
+    
+    .streaming-output.init-message {
+        background: rgba(66, 133, 244, 0.1);
+        border-left-color: #4285f4;
+        color: #4285f4;
+        font-style: italic;
+    }
+    
+    .streaming-output.error-message {
+        background: rgba(244, 67, 54, 0.1);
+        border-left-color: #f44336;
+        color: #f44336;
+    }
+    
+    .streaming-output.tool-use {
+        background: rgba(33, 150, 243, 0.1);
+        border-left-color: #2196f3;
+        color: #1565c0;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    
+    .streaming-output.tool-result {
+        background: rgba(76, 175, 80, 0.1);
+        border-left-color: #4caf50;
+        color: #2e7d32;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+    }
+    
+    .streaming-output.tool-error {
+        background: rgba(255, 152, 0, 0.1);
+        border-left-color: #ff9800;
+        color: #e65100;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+    }
+    
+    .streaming-output.tool-approval {
+        background: rgba(255, 193, 7, 0.1);
+        border-left-color: #ffc107;
+        color: #f57f17;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+    }
+    
+    .streaming-output.assistant-message {
+        background: rgba(255, 107, 53, 0.05);
+        border-left-color: var(--claude-primary);
+        color: var(--claude-text-secondary);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .streaming-output.final-result {
+        background: rgba(76, 175, 80, 0.1);
+        border-left-color: #4caf50;
+        color: #2e7d32;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+    
+    /* System Message Styles */
+    .streaming-output.system-init {
+        background: rgba(33, 150, 243, 0.1);
+        border-left-color: #2196f3;
+        color: #1565c0;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+    
+    .streaming-output.system-message {
+        background: rgba(96, 125, 139, 0.1);
+        border-left-color: #607d8b;
+        color: #37474f;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    
+    /* User Message Styles */
+    .streaming-output.user-message {
+        background: rgba(255, 193, 7, 0.1);
+        border-left-color: #ffc107;
+        color: #f57f17;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    
+    /* Other Message Styles */
+    .streaming-output.other-message {
+        background: rgba(156, 39, 176, 0.1);
+        border-left-color: #9c27b0;
+        color: #6a1b9a;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    
+    /* Usage Metadata Styles */
+    .streaming-output.usage-metadata {
+        background: rgba(63, 81, 181, 0.1);
+        border-left-color: #3f51b5;
+        color: #283593;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        padding: 8px 12px;
+        margin-top: 8px;
+    }
+    
+    .streaming-output pre {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin: 8px 0;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+    
+    .streaming-output code {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.1);
+    }
+    
+    .approval-content {
+        margin-top: 8px;
+    }
+    
+    .approval-message {
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+    
+    .approval-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    
+    .approve-btn, .dismiss-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .approve-btn {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+    
+    .approve-btn:hover {
+        background: linear-gradient(135deg, #45a049, #3d8b40);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+    
+    .dismiss-btn {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+    }
+    
+    .dismiss-btn:hover {
+        background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    }
+    
+    /* Approval Notification Styles */
+    .approval-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(255, 193, 7, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        z-index: 10000;
+        max-width: 400px;
+        min-width: 300px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+    }
+    
+    .approval-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    .approval-notification.hide {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    
+    .notification-content {
+        display: flex;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .notification-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    
+    .notification-text {
+        flex: 1;
+    }
+    
+    .notification-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #fff;
+        margin-bottom: 4px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .notification-message {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+    
+    .tool-info {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+    
+    .tool-display {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 12px;
+        font-family: 'Courier New', monospace;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 6px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .notification-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .approve-notification-btn {
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+    }
+    
+    .approve-notification-btn:hover {
+        background: rgba(76, 175, 80, 1);
+        transform: translateY(-1px);
+    }
+    
+    .dismiss-notification-btn {
+        background: rgba(244, 67, 54, 0.9);
+        color: white;
+    }
+    
+    .dismiss-notification-btn:hover {
+        background: rgba(244, 67, 54, 1);
+        transform: translateY(-1px);
+    }
+    
+    .close-notification-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 14px;
+        padding: 4px 8px;
+    }
+    
+    .close-notification-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .approval-notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            min-width: auto;
+        }
+        
+        .notification-actions {
+            justify-content: center;
+        }
+    }
+    
+    .response-metadata {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 107, 53, 0.2);
+        color: var(--claude-text-light);
+        opacity: 0.7;
+    }
+    
+    @keyframes streaming-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Streaming indicator */
+    .streaming-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--claude-primary);
+        border-radius: 50%;
+        margin-right: 6px;
+        animation: streaming-dot 1.5s infinite;
+    }
+    
+    @keyframes streaming-dot {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+</style>
+{% endblock %}
+
+{% block body_class %}claude-theme{% endblock %}
+{% block logo %}C{% endblock %}
+{% block agent_title %}Claude Agent{% endblock %}
+{% block subtitle %}Advanced AI Reasoning & Coding{% endblock %}
+{% block status_color %}color: var(--claude-text-light);{% endblock %}
+{% block placeholder %}Enter command for Claude...{% endblock %}
+{% block disconnect_title %}Disconnect Claude Session?{% endblock %}
+{% block disconnect_message %}This will end the session with Claude. All connected devices will be disconnected.{% endblock %}
+
+{% block agent_script %}
+<script>
+    // Claude-specific configuration for SDK mode
+    window.addEventListener('load', function() {
+        initializeAgent({
+            type: 'claude',
+            name: 'Claude',
+            subtitle: 'Advanced AI Reasoning & Coding (Python SDK)',
+            logo: 'C',
+            // exitCommand: '/exit',
+            exitCommand: '',
+            avatar: 'C',
+            welcomeMessage: 'Welcome to Claude Agent Interface - Advanced AI Reasoning & Coding powered by the official Python SDK with real-time streaming and simplified approval'
+        });
+        
+        // Add Claude-specific UI enhancements for SDK mode
+        addClaudeSDKFeatures();
+    });
+    
+    function addClaudeSDKFeatures() {
+        // Add a status indicator for SDK mode
+        const statusContainer = document.getElementById('statusContainer');
+        if (statusContainer) {
+            const sdkIndicator = document.createElement('div');
+            sdkIndicator.className = 'headless-indicator';
+            sdkIndicator.innerHTML = `
+                <span class="headless-badge">Python SDK</span>
+                <span class="headless-description">Real-time Streaming & Simplified Approval</span>
+            `;
+            statusContainer.appendChild(sdkIndicator);
+        }
+        
+        // Modify the input field placeholder to reflect SDK mode
+        const inputField = document.getElementById('inputField');
+        if (inputField) {
+            inputField.placeholder = 'Enter command for Claude (Python SDK)...';
+        }
+        
+        // Add tooltip for SDK mode features
+        const sendButton = document.getElementById('sendButton');
+        if (sendButton) {
+            sendButton.title = 'Send command to Claude using Python SDK with real-time streaming and approval';
+        }
+        
+        // Hide terminal-specific controls that aren't needed in SDK mode
+        const enterButton = document.getElementById('enterButton');
+        const backspaceButton = document.getElementById('backspaceButton');
+        
+        if (enterButton) {
+            enterButton.style.display = 'none';
+        }
+        if (backspaceButton) {
+            backspaceButton.style.display = 'none';
+        }
+        
+        // Add Claude-specific help text
+        const helpContent = document.getElementById('helpContent');
+        if (helpContent) {
+            const claudeHelp = document.createElement('div');
+            claudeHelp.className = 'claude-help-section';
+            claudeHelp.innerHTML = `
+                <h4>Claude Python SDK Features</h4>
+                <ul>
+                    <li><strong>Native SDK Integration:</strong> Uses official Claude Code Python SDK for optimal performance</li>
+                    <li><strong>Multi-turn Conversations:</strong> Seamless conversation continuity with context preservation</li>
+                    <li><strong>Real-time Streaming:</strong> Live streaming of responses with visual indicators</li>
+                    <li><strong>Tool Integration:</strong> Built-in support for Read, Write, Bash, and other tools</li>
+                    <li><strong>Session Management:</strong> Automatic session tracking and resumption</li>
+                    <li><strong>Simplified Approval System:</strong> Streamlined tool approval with real-time notifications</li>
+                </ul>
+                <h4>Available Commands</h4>
+                <ul>
+                    <li>Natural language queries and requests</li>
+                    <li>Code generation, analysis, and debugging</li>
+                    <li>File operations and project management</li>
+                    <li>System administration and automation</li>
+                    <li>Data analysis and visualization</li>
+                </ul>
+                <h4>Advanced Features</h4>
+                <ul>
+                    <li>Real-time streaming with type-specific styling</li>
+                    <li>Simplified tool approval with immediate notifications</li>
+                    <li>Cost tracking and performance metrics</li>
+                    <li>Error handling with detailed feedback</li>
+                    <li>Multi-client support with session sharing</li>
+                    <li>Automatic approval detection for tool operations</li>
+                </ul>
+            `;
+            helpContent.appendChild(claudeHelp);
+        }
+        
+        // Add streaming functionality
+        addClaudeStreamingSupport();
+    }
+    
+    function addClaudeStreamingSupport() {
+        // Override the default sendCommand function for Claude streaming
+        const originalSendCommand = window.sendCommand;
+        window.sendCommand = function() {
+            const command = document.getElementById('inputField').value.trim();
+            if (!command || !isConnected) return;
+            
+            // Finalize any current agent message before sending new command
+            if (currentAgentMessage) {
+                finalizeAgentMessage();
+            }
+            
+            addMessage(command, 'user');
+            
+            // Show thinking cursor animation
+            showThinkingCursor();
+            
+            // Use streaming command for Claude SDK
+            socket.emit('send_streaming_command', { 
+                agent_type: 'claude',
+                command: command,
+                device_id: deviceId
+            });
+            
+            document.getElementById('inputField').value = '';
+            document.getElementById('inputField').focus();
+        };
+        
+        // Add streaming input support
+        let streamingInputBuffer = '';
+        let streamingInputTimeout = null;
+        
+        const inputField = document.getElementById('inputField');
+        if (inputField) {
+            inputField.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // Clear previous timeout
+                if (streamingInputTimeout) {
+                    clearTimeout(streamingInputTimeout);
+                }
+                
+                // Add to buffer
+                streamingInputBuffer = value;
+                
+                // Send streaming input chunk
+                if (isConnected && value.length > 0) {
+                    socket.emit('send_streaming_input', {
+                        agent_type: 'claude',
+                        input_chunk: value,
+                        device_id: deviceId
+                    });
+                }
+                
+                // Set timeout to clear buffer after inactivity
+                streamingInputTimeout = setTimeout(() => {
+                    streamingInputBuffer = '';
+                }, 1000);
+            });
+        }
+        
+        // Handle streaming output from Claude SDK
+        socket.on('agent_output', function(data) {
+            console.log('Claude Agent output received:', data);
+            if (data.streaming) {
+                console.log('Streaming output:', data);
+                handleClaudeSDKStreamingOutput(data);
+            } else {
+                // Handle regular output
+                console.log('Regular output:', data);
+                // Hide thinking cursor when we start receiving output
+                hideThinkingCursor();
+                handleAgentOutput(data.content);
+            }
+        });
+        
+        // Handle streaming input acknowledgment
+        socket.on('streaming_input_ack', function(data) {
+            console.log('Streaming input acknowledged:', data);
+        });
+        
+        // Initialize simplified approval system
+        initializeSimplifiedApprovalSystem();
+    }
+    
+    function formatToolResult(content) {
+        // Format tool results with proper code highlighting
+        if (content.includes('```')) {
+            return content; // Already formatted
+        }
+        
+        // If it's a long result, format it as code
+        if (content.length > 50 && !content.includes('\n')) {
+            return `<pre><code>${content}</code></pre>`;
+        }
+        
+        return content;
+    }
+    
+    function handleClaudeSDKStreamingOutput(data) {
+        const { content, type, metadata, streaming } = data;
+
+        // Hide thinking cursor when we start receiving streaming output
+        hideThinkingCursor();
+
+        const processed_content = ansiUp.ansi_to_html(content);
+        
+        // Create a new message for each streaming output
+        const newMessage = createMessage('', 'agent');
+        document.getElementById('chatContainer').appendChild(newMessage);
+        
+        const messageContent = newMessage.querySelector('.message-content');
+        
+        // Create streaming output element for this specific message
+        const streamingElement = document.createElement('div');
+        streamingElement.className = 'streaming-output';
+        messageContent.appendChild(streamingElement);
+        
+        // Add streaming indicator if still streaming
+        if (streaming) {
+            const indicator = document.createElement('span');
+            indicator.className = 'streaming-indicator';
+            streamingElement.appendChild(indicator);
+        }
+        
+        // Handle different types of streaming content from Claude SDK
+        switch (type) {
+            case 'init':
+                streamingElement.className = 'streaming-output init-message';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'assistant_message':
+                // Assistant message - format as regular Claude response
+                streamingElement.className = 'streaming-output assistant-message';
+                streamingElement.innerHTML = processed_content;
+                break;
+                
+            case 'final_result':
+                // Final result - replace all content with final result
+                streamingElement.className = 'streaming-output final-result';
+                streamingElement.innerHTML = processed_content;
+                // Mark this as the final result to prevent further updates
+                streamingElement.setAttribute('data-final', 'true');
+                break;
+                
+            case 'tool_use':
+                // Tool use - show with info styling and metadata
+                streamingElement.className = 'streaming-output tool-use';
+                const toolUseId = metadata?.tool_use_id || '';
+                const toolName = metadata?.tool_name || '';
+                streamingElement.setAttribute('data-tool-use-id', toolUseId);
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'tool_result':
+                // Tool result - show with success styling and code formatting
+                streamingElement.className = 'streaming-output tool-result';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${formatToolResult(processed_content)}`;
+                break;
+                
+            case 'tool_error':
+                // Tool error - show with error styling
+                streamingElement.className = 'streaming-output tool-error';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'tool_approval_required':
+                // Tool approval required - show with interactive buttons
+                createInMessageApproval(data);
+                // streamingElement.className = 'streaming-output tool-approval';
+                // const approvalToolId = metadata?.approval_id || metadata?.tool_use_id || data.tool_use_id || '';
+                // streamingElement.setAttribute('data-tool-use-id', approvalToolId);
+                // streamingElement.innerHTML = `
+                //     <span class="streaming-indicator"></span>
+                //     <div class="approval-content">
+                //         <div class="approval-message">${processed_content}</div>
+                //         <div class="approval-buttons">
+                //             <button class="approve-btn" onclick="submitApprovalDecision('${approvalToolId}', true)">
+                //                 ✅ Approve
+                //             </button>
+                //             <button class="dismiss-btn" onclick="submitApprovalDecision('${approvalToolId}', false)">
+                //                 ❌ Dismiss
+                //             </button>
+                //         </div>
+                //     </div>
+                // `;
+                // break;
+                
+            case 'error':
+                streamingElement.className = 'streaming-output error-message';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'user_message':
+                // User message - show with user styling
+                streamingElement.className = 'streaming-output user-message';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'usage_metadata':
+                // Usage metadata - show with metadata styling
+                streamingElement.className = 'streaming-output usage-metadata';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            case 'unknown':
+                // Unknown message type - show with neutral styling
+                streamingElement.className = 'streaming-output';
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+                break;
+                
+            default:
+                streamingElement.innerHTML = `<span class="streaming-indicator"></span>${processed_content}`;
+        }
+        
+        // Add metadata if available (only for final results)
+        if (metadata && !streaming && !streamingElement.querySelector('.response-metadata')) {
+            const metadataElement = document.createElement('div');
+            metadataElement.className = 'response-metadata';
+            
+            let metadataText = '';
+            if (metadata.total_cost_usd) {
+                metadataText += `Cost: $${metadata.total_cost_usd} `;
+            }
+            if (metadata.duration_ms) {
+                const duration = metadata.duration_ms > 1000 ? 
+                    `${(metadata.duration_ms / 1000).toFixed(1)}s` : 
+                    `${metadata.duration_ms}ms`;
+                metadataText += `Duration: ${duration} `;
+            }
+            if (metadata.num_turns) {
+                metadataText += `Turns: ${metadata.num_turns} `;
+            }
+            if (metadata.usage) {
+                const usage = metadata.usage;
+                if (usage.input_tokens) {
+                    metadataText += `Input: ${usage.input_tokens} tokens `;
+                }
+                if (usage.output_tokens) {
+                    metadataText += `Output: ${usage.output_tokens} tokens `;
+                }
+            }
+            
+            if (metadataText.trim()) {
+                metadataElement.textContent = metadataText.trim();
+                streamingElement.appendChild(metadataElement);
+            }
+        }
+        
+        // Finalize this specific message if not streaming
+        if (!streaming) {
+            finalizeStreamingMessage(newMessage);
+        }
+        
+        scrollToBottom();
+    }
+    
+    function finalizeStreamingMessage(message) {
+        if (message) {
+            const streamingElement = message.querySelector('.streaming-output');
+            if (streamingElement) {
+                // Remove streaming indicator
+                const indicator = streamingElement.querySelector('.streaming-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+                
+                // Remove streaming animation
+                streamingElement.style.animation = 'none';
+                
+                // Add timestamp
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date().toLocaleTimeString();
+                timestamp.style = 'font-size: 11px; color: rgba(255, 107, 53, 0.3); margin-top: 5px;';
+                streamingElement.appendChild(timestamp);
+            }
+        }
+    }
+    
+    // Simplified Approval System
+    function initializeSimplifiedApprovalSystem() {
+        console.log('Initializing simplified approval system...');
+        
+        // Handle approval requests from the main app
+        socket.on('approval_request', function(data) {
+            console.log('Approval request received:', data);
+            handleApprovalRequest(data);
+        });
+        
+        // Handle approval decision updates
+        socket.on('approval_decision', function(data) {
+            console.log('Approval decision update:', data);
+            updateApprovalUI(data);
+        });
+        
+        // Handle approval errors
+        socket.on('approval_error', function(data) {
+            console.error('Approval error:', data);
+            showToast('Approval Error', data.message, 'error');
+        });
+        
+        // Handle approval submission confirmation
+        socket.on('approval_submitted', function(data) {
+            console.log('Approval submitted:', data);
+            showToast('Approval Decision', `Request ${data.approved ? 'approved' : 'denied'}`, 'success');
+        });
+        
+        // Check for any pending approvals on page load
+        setTimeout(checkPendingApprovals, 1000);
+    }
+    
+    function handleApprovalRequest(approvalData) {
+        console.log('Handling approval request:', approvalData);
+        
+        // Show approval notification
+        showApprovalNotification(approvalData);
+        
+        // Also create an in-message approval if we have tool_use_id
+        if (approvalData.tool_use_id) {
+            createInMessageApproval(approvalData);
+        }
+        
+        // Show browser notification if permission is granted
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Claude Needs Approval', {
+                body: `Tool: ${approvalData.tool_name}`,
+                icon: '/static/favicon.ico',
+                tag: 'claude-approval'
+            });
+        } else if ('Notification' in window && Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Claude Needs Approval', {
+                        body: `Tool: ${approvalData.tool_name}`,
+                        icon: '/static/favicon.ico',
+                        tag: 'claude-approval'
+                    });
+                }
+            });
+        }
+    }
+    
+    function createInMessageApproval(approvalData) {
+        // Create a new message for the approval request
+        const newMessage = createMessage('', 'agent');
+        document.getElementById('chatContainer').appendChild(newMessage);
+        
+        const messageContent = newMessage.querySelector('.message-content');
+        
+        // Create approval element
+        const approvalElement = document.createElement('div');
+        approvalElement.className = 'streaming-output tool-approval';
+        approvalElement.setAttribute('data-tool-use-id', approvalData.tool_use_id);
+        approvalElement.setAttribute('data-approval-id', approvalData.approval_id);
+        
+        const toolInfo = `Tool: ${approvalData.tool_name}`;
+        const toolDisplay = formatToolInputDisplay(approvalData.input);
+        
+        approvalElement.innerHTML = `
+            <div class="approval-content">
+                <div class="approval-message">
+                    <strong>🔒 Tool Approval Required</strong><br>
+                    ${approvalData.message || `Claude wants to use tool: ${approvalData.tool_name}`}
+                    ${approvalData.reason ? `<br><em>Reason: ${approvalData.reason}</em>` : ''}
+                </div>
+                <div class="tool-info" style="margin: 8px 0; font-size: 12px; color: rgba(255, 193, 7, 0.8);">
+                    ${toolInfo}
+                </div>
+                ${toolDisplay ? `<div class="tool-display" style="margin: 8px 0; font-size: 11px; color: rgba(255, 193, 7, 0.7); font-family: 'Courier New', monospace; background: rgba(0, 0, 0, 0.2); padding: 6px 8px; border-radius: 4px; border: 1px solid rgba(255, 193, 7, 0.1);">${toolDisplay}</div>` : ''}
+                <div class="approval-buttons">
+                    <button class="approve-btn" onclick="submitApprovalDecision('${approvalData.approval_id}', true)">
+                        ✅ Approve
+                    </button>
+                    <button class="dismiss-btn" onclick="submitApprovalDecision('${approvalData.approval_id}', false)">
+                        ❌ Deny
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        messageContent.appendChild(approvalElement);
+        scrollToBottom();
+    }
+    
+    function showApprovalNotification(approvalData) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'approval-notification';
+        notification.setAttribute('data-approval-id', approvalData.approval_id);
+        
+        // Format tool information for display
+        const toolInfo = `Tool: ${approvalData.tool_name}`;
+        const toolDisplay = formatToolInputDisplay(approvalData.input);
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-icon">⚠️</div>
+                <div class="notification-text">
+                    <div class="notification-title">Claude Needs Approval</div>
+                    <div class="notification-message">${approvalData.message}</div>
+                    <div class="tool-info">${toolInfo}</div>
+                    ${toolDisplay ? `<div class="tool-display">${toolDisplay}</div>` : ''}
+                    ${approvalData.reason ? `<div class="tool-info">Reason: ${approvalData.reason}</div>` : ''}
+                    <div class="notification-actions">
+                        <button class="notification-btn approve-notification-btn" 
+                                onclick="submitApprovalDecision('${approvalData.approval_id}', true)">
+                            ✅ Approve
+                        </button>
+                        <button class="notification-btn dismiss-notification-btn" 
+                                onclick="submitApprovalDecision('${approvalData.approval_id}', false)">
+                            ❌ Deny
+                        </button>
+                        <button class="notification-btn close-notification-btn" 
+                                onclick="closeNotification(this)">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Show notification with animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Auto-hide after 4 minutes if not interacted with (server timeout is 5 minutes)
+        setTimeout(() => {
+            if (notification.parentNode) {
+                closeNotification(notification.querySelector('.close-notification-btn'));
+            }
+        }, 240000); // 4 minutes
+    }
+    
+    function formatToolInputDisplay(toolInput) {
+        if (!toolInput || typeof toolInput !== 'object') {
+            return '';
+        }
+        
+        // Format different types of tool inputs
+        if (toolInput.command) {
+            return `Command: ${toolInput.command}`;
+        } else if (toolInput.path) {
+            return `Path: ${toolInput.path}`;
+        } else if (toolInput.content) {
+            const preview = toolInput.content.substring(0, 100);
+            return `Content: ${preview}${toolInput.content.length > 100 ? '...' : ''}`;
+        } else if (toolInput.text) {
+            const preview = toolInput.text.substring(0, 100);
+            return `Text: ${preview}${toolInput.text.length > 100 ? '...' : ''}`;
+        } else {
+            // Show first few key-value pairs
+            const entries = Object.entries(toolInput).slice(0, 3);
+            const preview = entries.map(([key, value]) => `${key}: ${String(value).substring(0, 50)}`).join(', ');
+            return preview.length > 200 ? preview.substring(0, 200) + '...' : preview;
+        }
+    }
+    
+    function submitApprovalDecision(approvalId, approved) {
+        console.log(`Submitting approval decision: ${approved ? 'approved' : 'denied'} for ${approvalId}`);
+        
+        const reason = approved ? 'User approved via notification interface' : 'User denied via notification interface';
+        
+        // Send via SocketIO for immediate feedback
+        socket.emit('submit_approval', {
+            approval_id: approvalId,
+            approved: approved,
+            reason: reason
+        });
+        
+        // Also send via HTTP as backup
+        fetch(`/api/approve_tools/${approvalId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                approved: approved,
+                reason: reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Approval decision submitted via HTTP successfully');
+            } else {
+                console.error('Failed to submit approval decision via HTTP:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting approval decision via HTTP:', error);
+        });
+        
+        // Update any in-message approval elements with the same approval_id
+        const inMessageApproval = document.querySelector(`[data-approval-id="${approvalId}"]`);
+        if (inMessageApproval && inMessageApproval.classList.contains('tool-approval')) {
+            const approvalContent = inMessageApproval.querySelector('.approval-content');
+            if (approvalContent) {
+                approvalContent.innerHTML = `
+                    <div class="approval-message" style="color: ${approved ? '#4caf50' : '#f44336'}; font-weight: 600;">
+                        ${approved ? '✅ Tool Approved' : '❌ Tool Denied'}
+                    </div>
+                `;
+            }
+            
+            // Remove streaming indicator if present
+            const indicator = inMessageApproval.querySelector('.streaming-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            timestamp.style = 'font-size: 11px; color: rgba(255, 107, 53, 0.3); margin-top: 5px;';
+            inMessageApproval.appendChild(timestamp);
+        }
+        
+        // Close the notification
+        const notification = document.querySelector(`.approval-notification[data-approval-id="${approvalId}"]`);
+        if (notification) {
+            closeNotification(notification.querySelector('.close-notification-btn'));
+        }
+        
+        // Show toast notification
+        showToast(
+            'Tool Approval', 
+            `Tool ${approved ? 'approved' : 'denied'} successfully`, 
+            approved ? 'success' : 'info'
+        );
+    }
+    
+    function updateApprovalUI(data) {
+        // Update any UI elements showing approval status
+        const notification = document.querySelector(`[data-approval-id="${data.approval_id}"]`);
+        if (notification) {
+            // Replace action buttons with status
+            const actions = notification.querySelector('.notification-actions');
+            if (actions) {
+                actions.innerHTML = `
+                    <span style="color: ${data.approved ? '#4caf50' : '#f44336'}; font-weight: 600;">
+                        ${data.approved ? '✅ Approved' : '❌ Denied'}
+                    </span>
+                    <button class="notification-btn close-notification-btn" onclick="closeNotification(this)">
+                        ✕
+                    </button>
+                `;
+            }
+            
+            // Auto-close after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    closeNotification(notification.querySelector('.close-notification-btn'));
+                }
+            }, 3000);
+        }
+    }
+    
+    function closeNotification(button) {
+        const notification = button.closest('.approval-notification');
+        if (notification) {
+            notification.classList.add('hide');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
+    
+    function checkPendingApprovals() {
+        fetch('/api/pending_approvals')
+            .then(response => response.json())
+            .then(data => {
+                if (data.pending_approvals && data.pending_approvals.length > 0) {
+                    console.log(`Found ${data.pending_approvals.length} pending approvals`);
+                    data.pending_approvals.forEach(approval => {
+                        // Show each pending approval
+                        handleApprovalRequest({
+                            approval_id: approval.approval_id,
+                            tool_name: approval.tool_name,
+                            input: approval.input,
+                            reason: approval.reason,
+                            message: `Claude wants to use tool: ${approval.tool_name}`,
+                            timestamp: approval.timestamp
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error checking pending approvals:', error);
+            });
+    }
+    
+    // Handle tool approval from in-message buttons
+    function handleToolApproval(toolUseId, approved) {
+        console.log(`Handling tool approval: ${approved ? 'approved' : 'denied'} for tool use ${toolUseId}`);
+        
+        // Find the approval element in the chat
+        const approvalElement = document.querySelector(`[data-tool-use-id="${toolUseId}"]`);
+        if (approvalElement) {
+            // Update the UI to show the decision
+            const approvalContent = approvalElement.querySelector('.approval-content');
+            if (approvalContent) {
+                approvalContent.innerHTML = `
+                    <div class="approval-message" style="color: ${approved ? '#4caf50' : '#f44336'}; font-weight: 600;">
+                        ${approved ? '✅ Tool Approved' : '❌ Tool Denied'}
+                    </div>
+                `;
+            }
+            
+            // Remove streaming indicator
+            const indicator = approvalElement.querySelector('.streaming-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+            
+            // Add timestamp
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            timestamp.style = 'font-size: 11px; color: rgba(255, 107, 53, 0.3); margin-top: 5px;';
+            approvalElement.appendChild(timestamp);
+        }
+        
+        // Send approval decision to server
+        const reason = approved ? 'User approved via chat interface' : 'User denied via chat interface';
+        
+        // Send via SocketIO for immediate feedback
+        socket.emit('submit_tool_approval', {
+            tool_use_id: toolUseId,
+            approved: approved,
+            reason: reason
+        });
+        
+        // Also try to find and submit via approval_id if available
+        const approvalId = approvalElement?.getAttribute('data-approval-id');
+        if (approvalId) {
+            socket.emit('submit_approval', {
+                approval_id: approvalId,
+                approved: approved,
+                reason: reason
+            });
+        }
+        
+        // Show toast notification
+        showToast(
+            'Tool Approval', 
+            `Tool ${approved ? 'approved' : 'denied'} successfully`, 
+            approved ? 'success' : 'info'
+        );
+    }
+    
+    // // Helper function to show toast notifications
+    // function showToast(title, message, type = 'info') {
+    //     // Create toast element
+    //     const toast = document.createElement('div');
+    //     toast.className = `toast toast-${type}`;
+    //     toast.style.cssText = `
+    //         position: fixed;
+    //         top: 20px;
+    //         right: 20px;
+    //         background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : '#2196f3'};
+    //         color: white;
+    //         padding: 12px 20px;
+    //         border-radius: 8px;
+    //         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    //         z-index: 10001;
+    //         max-width: 300px;
+    //         opacity: 0;
+    //         transform: translateX(100%);
+    //         transition: all 0.3s ease;
+    //     `;
+        
+    //     toast.innerHTML = `
+    //         <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
+    //         <div style="font-size: 14px; opacity: 0.9;">${message}</div>
+    //     `;
+        
+    //     document.body.appendChild(toast);
+        
+    //     // Show toast
+    //     setTimeout(() => {
+    //         toast.style.opacity = '1';
+    //         toast.style.transform = 'translateX(0)';
+    //     }, 100);
+        
+    //     // Hide toast after 3 seconds
+    //     setTimeout(() => {
+    //         toast.style.opacity = '0';
+    //         toast.style.transform = 'translateX(100%)';
+    //         setTimeout(() => {
+    //             if (toast.parentNode) {
+    //                 toast.parentNode.removeChild(toast);
+    //             }
+    //         }, 300);
+    //     }, 3000);
+    // }
+</script>
+{% endblock %}

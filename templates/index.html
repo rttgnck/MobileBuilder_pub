@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobileBuilder - Multi-Agent Interface</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Multi-Agent AI Interface for coding and development work with advanced reasoning and multimodal capabilities">
+    <meta name="keywords" content="AI, mobile, builder, agent, development, coding, multimodal">
+    <meta name="author" content="MobileBuilder">
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+    
+    <!-- Apple Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MobileBuilder">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/images/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/images/icons/icon-192x192.png">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="72x72" href="/static/images/icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/images/icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/static/images/icons/icon-128x128.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="/static/images/icons/icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="152x152" href="/static/images/icons/icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/images/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="384x384" href="/static/images/icons/icon-384x384.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/images/icons/icon-512x512.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-scaling.css') }}">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/static/images/logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="/static/js/pwa-install.js" as="script">
+
+    <style>
+        /* PWA-specific styles for streamlined interface */
+        
+        /* PWA Detection Classes */
+        .pwa-only { display: none; }
+        .browser-only { display: block; }
+        
+        body.pwa-mode .pwa-only { display: block; }
+        body.pwa-mode .browser-only { display: none; }
+        
+        /* Streamlined PWA Styles */
+        body.pwa-mode .hero-section h2 {
+            font-size: var(--text-2xl);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        body.pwa-mode .hero-section p.browser-only,
+        body.pwa-mode .agent-card p.browser-only,
+        body.pwa-mode .agent-features.browser-only,
+        body.pwa-mode .info-section.browser-only,
+        body.pwa-mode .footer.browser-only {
+            display: none !important;
+            visibility: hidden;
+        }
+        
+        /* body.pwa-mode .agent-card {
+            padding: var(--spacing-4xl);
+            min-height: auto;
+        } */
+        
+        /* body.pwa-mode .agent-card h3 {
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--text-xl);
+        } */
+        
+        body.pwa-mode .agent-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        body.pwa-mode .container {
+            height: 95vh;
+            height: 95svh;
+        }
+        
+        body.pwa-mode .main-content {
+            padding: var(--spacing-5xl) var(--spacing-6xl);
+        }
+        
+        body.pwa-mode .header {
+            padding: var(--spacing-3xl) var(--spacing-6xl);
+        }
+        
+        body.pwa-mode .header h1 {
+            font-size: var(--text-2xl);
+        }
+        
+        body.pwa-mode .subtitle {
+            font-size: var(--text-base);
+            margin-bottom: 0;
+        }
+        
+        /* Compact agent grid for PWA */
+        body.pwa-mode .agent-grid {
+            margin-top: -50px;
+            gap: var(--spacing-4xl);
+            margin-bottom: var(--spacing-6xl);
+        }
+        
+        /* Hide installation guide in PWA mode */
+        /* body.pwa-mode .no-agents-section .installation-steps {
+            display: none;
+        } */
+        
+        body.pwa-mode .no-agents-section h3 {
+            font-size: var(--text-xl);
+        }
+        
+        body.pwa-mode .no-agents-section p {
+            margin-bottom: var(--spacing-4xl);
+        }
+        
+        /* Streamlined agent path display */
+        body.pwa-mode .agent-path {
+            font-size: var(--text-xs);
+            opacity: 0.7;
+            margin-top: var(--spacing-sm);
+        }
+        
+        /* Compact install notes */
+        body.pwa-mode .install-note {
+            font-size: var(--text-sm);
+            margin-top: var(--spacing-sm);
+        }
+        
+        /* Enhanced focus on action buttons in PWA mode */
+        body.pwa-mode .agent-button {
+            /* font-weight: var(--font-semibold); */
+            padding: var(--spacing-lg) var(--spacing-5xl);
+        }
+        
+        /* Clean header controls for PWA */
+        body.pwa-mode .header-controls {
+            gap: var(--spacing-3xl);
+        }
+        
+        /* Minimal cache status in PWA */
+        body.pwa-mode .cache-status .cache-text {
+            display: none;
+        }
+        
+        body.pwa-mode .cache-status {
+            padding: var(--spacing-xs);
+            min-width: auto;
+        }
+        
+        /* PWA-specific responsive adjustments */
+        @media (max-width: 768px) {
+            body.pwa-mode .header {
+                padding: var(--spacing-2xl) var(--spacing-4xl);
+            }
+            
+            body.pwa-mode .main-content {
+                padding: var(--spacing-3xl);
+            }
+            
+            body.pwa-mode .agent-grid {
+                gap: var(--spacing-3xl);
+            }
+            
+            body.pwa-mode .agent-card {
+                padding: var(--spacing-3xl);
+            }
+        }
+
+        /* Enhanced PWA branding */
+        body.pwa-mode .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: var(--radius-sm);
+        }
+    </style>
+</head>
+<body class="index-page">
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img class="logo-image" src="/static/images/logo.svg" alt="MobileBuilder Logo">
+            </div>
+            <h1>MobileBuilder</h1>
+            <p class="subtitle">Multi-Agent Interface</p>
+            <div class="header-controls">
+                <div id="cache-status" class="cache-status" style="display: none;">
+                    <span class="cache-icon">💾</span>
+                    <span class="cache-text">Using cached data</span>
+                </div>
+                <button id="session-history-button" class="session-history-button" title="View session history">
+                    <span class="session-history-icon">📚</span>
+                </button>
+                <button id="refresh-agents" class="refresh-button" title="Refresh agent availability">
+                    <span class="refresh-icon">🔄</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="hero-section">
+                {% if agent_status.any_installed %}
+                    <h2>Choose Your AI Agent</h2>
+                    <p class="browser-only">Select an AI agent to start coding and development work with advanced reasoning and multimodal capabilities</p>
+                    <p class="pwa-only">Select an agent to launch</p>
+                {% else %}
+                    <h2>Install AI Agents</h2>
+                    <p class="browser-only">Install one or more AI agents to start coding and development work with advanced reasoning and multimodal capabilities</p>
+                    <p class="pwa-only">Install agents to get started</p>
+                {% endif %}
+            </div>
+
+            <div class="agent-grid">
+                <!-- Small plus button anchored to top right of agent grid -->
+                {% if agent_status.show_expand %}
+                    <div class="expand-button-container">
+                        <button class="expand-plus-button" onclick="toggleUnavailableAgents()" title="Show installation options">
+                            <span class="expand-plus-icon">+</span>
+                        </button>
+                    </div>
+                {% endif %}
+                {% for agent_type, agent in agent_status.agents.items() %}
+                    {% if agent.available %}
+                        <!-- Available agent - show launch button -->
+                        <div class="agent-card {{ agent_type }}-card" onclick="window.location.href = '/{{ agent_type }}'">
+                            <div class="agent-icon">{{ agent.icon }}</div>
+                            <h3>{{ agent.name }}</h3>
+                            <!-- <p class="browser-only">{{ agent.description }}</p> -->
+                            <p>{{ agent.description }}</p>
+                            <!-- <div class="agent-features browser-only"> -->
+                            <div class="agent-features">
+                                {% for feature in agent.features %}
+                                    <span class="feature">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                            <a href="/{{ agent_type }}" class="agent-button {{ agent_type }}-button">Launch {{ agent.name }}</a>
+                            {% if agent.path %}
+                                <!-- <div class="agent-path browser-only">Installed at:</br>{{ agent.path }}</div> -->
+                                <div class="agent-path">Installed at:</br>{{ agent.path }}</div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- Unavailable agent - hidden by default -->
+                        <div class="agent-card {{ agent_type }}-card unavailable hidden-agent" style="display: none;">
+                            <div class="agent-icon unavailable-icon">{{ agent.icon }}</div>
+                            <h3>{{ agent.name }}</h3>
+                            <!-- <p class="browser-only">{{ agent.description }}</p> -->
+                            <p>{{ agent.description }}</p>
+                            <!-- <div class="agent-features browser-only"> -->
+                            <div class="agent-features">
+                                {% for feature in agent.features %}
+                                    <span class="feature">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                            <a href="{{ agent.install_url }}" target="_blank" class="agent-button install-button">
+                                {{ agent.install_text }}
+                            </a>
+                            <div class="install-note">Click to install {{ agent.name }}</div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if not agent_status.any_installed %}
+                <div class="no-agents-section">
+                    <div class="no-agents-icon">⚠️</div>
+                    <h3>No AI Agents Installed</h3>
+                    <p>You need to install at least one AI agent to use MobileBuilder. Click on any of the cards above to get started with installation.</p>
+                    <!-- <div class="installation-steps browser-only"> -->
+                    <div class="installation-steps">
+                        <h4>Quick Installation Guide:</h4>
+                        <ol>
+                            <li><strong>Claude:</strong> Visit the official Anthropic documentation and follow the CLI installation steps</li>
+                            <li><strong>Gemini:</strong> Use Google's official installation guide for the Gemini CLI</li>
+                            <li><strong>Cursor:</strong> Download and install Cursor from the official website</li>
+                            <li><strong>Codex:</strong> Get OpenAI's Codex CLI which is available on the OpenAI website</li>
+                        </ol>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="info-section browser-only">
+                <h3>Powerful Features</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <h4>Multi-Device Sync</h4>
+                        <p>Connect from multiple devices and stay synchronized across all sessions</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💾</div>
+                        <h4>Session History</h4>
+                        <p>Persistent session history and conversation logs for future reference</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏰</div>
+                        <h4>Agent Session Resume</h4>
+                        <p>Resume sessions from previous workflows and continue working where supported</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📁</div>
+                        <h4>Directory Control</h4>
+                        <p>Configure working directories for each session and project</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer browser-only">
+            <p>&copy; 2025 MobileBuilder. Multi-Agent AI Interface.</p>
+        </footer>
+    </div>
+
+    <!-- Session History Popover Modal -->
+    <div id="session-history-modal" class="session-history-modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeSessionHistoryModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Agent Session History</h3>
+                <button class="modal-close" onclick="closeSessionHistoryModal()" title="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Choose an agent to view its session history:</p>
+                <div class="agent-list">
+                    {% for agent_type, agent in agent_status.agents.items() %}
+                        {% if agent.available %}
+                            <div class="agent-list-item" onclick="openSessionHistory('{{ agent_type }}')">
+                                <div class="agent-list-icon">{{ agent.icon }}</div>
+                                <div class="agent-list-info">
+                                    <h4>{{ agent.name }}</h4>
+                                    <!-- <p class="browser-only">{{ agent.description }}</p> -->
+                                    <p>{{ agent.description }}</p>
+                                </div>
+                                <div class="agent-list-arrow">→</div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if not agent_status.any_installed %}
+                    <div class="no-agents-message">
+                        <p>No agents are currently installed. Install an agent first to view session history.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA Detection and Mode Setting
+        function detectPWAMode() {
+            // Check if running as PWA
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                window.navigator.standalone === true ||
+                                document.referrer.includes('android-app://');
+            
+            if (isStandalone) {
+                document.body.classList.add('pwa-mode');
+                console.log('PWA mode detected - switching to streamlined interface');
+            } else {
+                console.log('Browser mode detected - showing full interface');
+            }
+        }
+
+        // Enhanced interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect PWA mode first
+            detectPWAMode();
+            
+            // Listen for display mode changes
+            window.matchMedia('(display-mode: standalone)').addListener(detectPWAMode);
+            
+            const agentGrid = document.querySelector('.agent-grid');
+            const availableAgents = document.querySelectorAll('.agent-card:not(.hidden-agent)');
+            const hiddenAgents = document.querySelectorAll('.hidden-agent');
+            const visibleAgents = availableAgents.length;
+            
+            // Check and display cache status
+            checkCacheStatus();
+            
+            const agentCards = document.querySelectorAll('.agent-card');
+            const featureItems = document.querySelectorAll('.feature-item');
+            
+            // Agent card interactions
+            agentCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('unavailable')) {
+                        this.style.transform = 'translateY(-8px)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+                
+                // Add click ripple effect for available agents only
+                if (!card.classList.contains('unavailable')) {
+                    card.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'A') return; // Don't trigger on button clicks
+                        
+                        const ripple = document.createElement('div');
+                        ripple.style.position = 'absolute';
+                        ripple.style.borderRadius = '50%';
+                        ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                        ripple.style.transform = 'scale(0)';
+                        ripple.style.animation = 'ripple 0.6s linear';
+                        ripple.style.left = (e.clientX - this.offsetLeft) + 'px';
+                        ripple.style.top = (e.clientY - this.offsetTop) + 'px';
+                        ripple.style.width = ripple.style.height = '20px';
+                        
+                        this.appendChild(ripple);
+                        
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 600);
+                    });
+                }
+            });
+            
+            // Feature item interactions
+            featureItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Session history button functionality
+            const sessionHistoryButton = document.getElementById('session-history-button');
+            if (sessionHistoryButton) {
+                sessionHistoryButton.addEventListener('click', function() {
+                    openSessionHistoryModal();
+                });
+            }
+            
+            // Refresh button functionality
+            const refreshButton = document.getElementById('refresh-agents');
+            if (refreshButton) {
+                refreshButton.addEventListener('click', function() {
+                    refreshAgents();
+                });
+            }
+            
+            // Function to refresh agents
+            window.refreshAgents = function() {
+                const refreshButton = document.getElementById('refresh-agents');
+                const refreshIcon = refreshButton.querySelector('.refresh-icon');
+                
+                // Add loading state
+                refreshButton.classList.add('refreshing');
+                refreshButton.disabled = true;
+                refreshIcon.textContent = '⏳';
+                refreshButton.title = 'Refreshing agents...';
+                
+                // Make API call to refresh agents
+                fetch('/api/agents/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Agents refreshed successfully');
+                        // Show success feedback briefly
+                        refreshIcon.textContent = '✓';
+                        refreshButton.title = 'Agents refreshed successfully';
+                        
+                        // Reload the page after a short delay to show the updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        console.error('Failed to refresh agents:', data.error);
+                        // Show error feedback
+                        refreshIcon.textContent = '✗';
+                        refreshButton.title = 'Failed to refresh agents';
+                        
+                        // Reset button after delay
+                        setTimeout(() => {
+                            resetRefreshButton();
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing agents:', error);
+                    // Show error feedback
+                    refreshIcon.textContent = '✗';
+                    refreshButton.title = 'Error refreshing agents';
+                    
+                    // Reset button after delay
+                    setTimeout(() => {
+                        resetRefreshButton();
+                    }, 3000);
+                });
+            };
+            
+            // Function to reset refresh button
+            function resetRefreshButton() {
+                const refreshButton = document.getElementById('refresh-agents');
+                const refreshIcon = refreshButton.querySelector('.refresh-icon');
+                
+                refreshButton.classList.remove('refreshing');
+                refreshButton.disabled = false;
+                refreshIcon.textContent = '🔄';
+                refreshButton.title = 'Refresh agent availability';
+            }
+            
+            // Function to check and display cache status
+            function checkCacheStatus() {
+                fetch('/api/agents/cache/status')
+                .then(response => response.json())
+                .then(data => {
+                    const cacheStatus = document.getElementById('cache-status');
+                    const cacheText = cacheStatus.querySelector('.cache-text');
+                    
+                    if (data.has_cache && !data.cache_expired) {
+                        // Show cache status
+                        cacheStatus.style.display = 'flex';
+                        
+                        if (data.cache_age_days === 0) {
+                            cacheText.textContent = 'Using cached data (today)';
+                        } else if (data.cache_age_days === 1) {
+                            cacheText.textContent = 'Using cached data (1 day old)';
+                        } else {
+                            cacheText.textContent = `Using cached data (${data.cache_age_days} days old)`;
+                        }
+                        
+                        // Update title with more info
+                        cacheStatus.title = `Cache created: ${new Date(data.cache_timestamp).toLocaleString()}. Expires in ${data.cache_expires_in_days} days.`;
+                        
+                        // Add click handler to clear cache
+                        cacheStatus.style.cursor = 'pointer';
+                        cacheStatus.addEventListener('click', function() {
+                            if (confirm('Clear agent cache and refresh now?')) {
+                                clearCacheAndRefresh();
+                            }
+                        });
+                    } else {
+                        // Hide cache status if no cache or expired
+                        cacheStatus.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking cache status:', error);
+                    // Hide cache status on error
+                    document.getElementById('cache-status').style.display = 'none';
+                });
+            }
+            
+            // Function to clear cache and refresh
+            function clearCacheAndRefresh() {
+                fetch('/api/agents/cache/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Cache cleared successfully');
+                        // Now refresh agents
+                        refreshAgents();
+                    } else {
+                        console.error('Failed to clear cache:', data.error);
+                        alert('Failed to clear cache');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing cache:', error);
+                    alert('Error clearing cache');
+                });
+            }
+            
+            // Expand button functionality
+            window.toggleUnavailableAgents = function() {
+                const agentGrid = document.querySelector('.agent-grid');
+                const availableAgents = Array.from(document.querySelectorAll('.agent-card:not(.hidden-agent)'));
+                const hiddenAgents = Array.from(document.querySelectorAll('.hidden-agent'));
+                let visibleAgents = availableAgents.length;
+                const expandButton = document.querySelector('.expand-plus-button');
+                const expandIcon = document.querySelector('.expand-plus-icon');
+                
+                if (hiddenAgents.length > 0 && hiddenAgents[0].style.display === 'none') {
+                    // Show unavailable agents and move them to the top
+                    // Remove hidden agents from their current position
+                    hiddenAgents.forEach(agent => {
+                        agent.style.display = 'flex';
+                        agentGrid.removeChild(agent);
+                    });
+                    // Insert hidden agents at the beginning of the grid
+                    let firstChild = agentGrid.firstElementChild;
+                    // If the expand button is present, skip it
+                    if (firstChild && firstChild.classList && firstChild.classList.contains('expand-button-container')) {
+                        firstChild = firstChild.nextElementSibling;
+                    }
+                    // Insert each hidden agent before the first available agent card
+                    hiddenAgents.reverse().forEach(agent => {
+                        if (firstChild) {
+                            agentGrid.insertBefore(agent, firstChild);
+                        } else {
+                            agentGrid.appendChild(agent);
+                        }
+                    });
+                    expandIcon.textContent = '−';
+                    expandButton.classList.add('expanded');
+                    expandButton.title = 'Hide installation options';
+                } else {
+                    // Hide unavailable agents and move them back to their original position after available agents
+                    // Remove hidden agents from their current position
+                    hiddenAgents.forEach(agent => {
+                        agent.style.display = 'none';
+                        agentGrid.removeChild(agent);
+                    });
+                    // Find the last available agent card
+                    let lastAvailable = null;
+                    for (let i = agentGrid.children.length - 1; i >= 0; i--) {
+                        const el = agentGrid.children[i];
+                        if (el.classList && el.classList.contains('agent-card') && !el.classList.contains('hidden-agent')) {
+                            lastAvailable = el;
+                            break;
+                        }
+                    }
+                    // Insert hidden agents after the last available agent card
+                    hiddenAgents.forEach(agent => {
+                        if (lastAvailable && lastAvailable.nextSibling) {
+                            agentGrid.insertBefore(agent, lastAvailable.nextSibling);
+                        } else {
+                            agentGrid.appendChild(agent);
+                        }
+                    });
+                    expandIcon.textContent = '+';
+                    expandButton.classList.remove('expanded');
+                    expandButton.title = 'Show installation options';
+                }
+            };
+            
+            // Session history modal functions
+            window.openSessionHistoryModal = function() {
+                const modal = document.getElementById('session-history-modal');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Add fade-in animation
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            };
+            
+            window.closeSessionHistoryModal = function() {
+                const modal = document.getElementById('session-history-modal');
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                
+                // Hide modal after animation
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            };
+            
+            window.openSessionHistory = function(agentType) {
+                // Navigate to session history for the selected agent
+                window.location.href = `/session_viewer?agent=${agentType}`;
+            };
+            
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('session-history-modal');
+                    if (modal.style.display === 'flex') {
+                        closeSessionHistoryModal();
+                    }
+                }
+            });
+        });
+        
+        // Add ripple animation and cache status styling
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+            
+            .header-controls {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .cache-status {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 0.85em;
+                color: #666;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 4px 8px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: all 0.2s ease;
+            }
+            
+            .cache-status:hover {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            .cache-icon {
+                font-size: 0.9em;
+            }
+            
+            .refresh-button.refreshing {
+                opacity: 0.7;
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Register service worker like the working KidsTales example
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', {
+                    scope: '/'
+                }).then((registration) => {
+                    console.log('[PWA] Service Worker registered successfully:', registration.scope);
+                    
+                    // Handle service worker updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                console.log('[PWA] Service worker state:', newWorker.state);
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] New content is available and will be used when all tabs for this page are closed.');
+                                }
+                            });
+                        }
+                    });
+                    
+                }).catch((error) => {
+                    console.error('[PWA] Service Worker registration failed:', error);
+                });
+            });
+        }
+    </script>
+    
+    <!-- PWA Install Script -->
+    <script src="{{ url_for('static', filename='js/pwa-install.js') }}"></script>
+    
+    <!-- Mobile Scaling Script -->
+    <script src="{{ url_for('static', filename='js/mobile-scaling.js') }}"></script>
+</body>
+</html>
