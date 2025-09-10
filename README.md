@@ -3,6 +3,16 @@
 **Release Version:** Alpha v0.1.0a-091025  
 ⚠️ **This is an early alpha release and may contain many UI bugs and other issues. We encourage you to download, test, find bugs, and help us improve it!**
 
+## 📸 Screenshots
+
+<div align="center">
+  <img src="screenshots/index.png" alt="Main Interface" width="30%">
+  <img src="screenshots/connection.png" alt="Connection Screen" width="30%">
+  <img src="screenshots/agent.png" alt="Agent Chat" width="30%">
+</div>
+
+*Main Interface | Connection Screen | Agent Chat*
+
 A comprehensive multi-agent AI interface that supports Claude, Gemini, Cursor, and Codex command line agents with advanced streaming and session history, PWA install capabilities, Cross-device Sessions, PWA app interface scaling, and session resume (some agents).
 
 ## 🤝 Help Us Build This!
